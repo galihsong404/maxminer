@@ -32,7 +32,10 @@ app.use('/api/ad', adRoutes);
 app.use('/api/mine', mineRoutes);
 app.use('/api/economy', economyRoutes);
 
-app.get('/health', (req, res) => {
+// [SENIOR SECURITY AUDIT NOTE - FIXED ROUTING]
+// Previously mounted straight to `/health`, causing 404s when pinged via Vercel proxy.
+// Moving to `/api/health` synchronizes the backend routing with the frontend proxy expectations.
+app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'W2E Miner API is running.' });
 });
 

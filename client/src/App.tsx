@@ -10,6 +10,26 @@ const App: React.FC = () => {
   const { isConnected } = useAccount();
   const [activeTab, setActiveTab] = useState<'MINE' | 'UPGRADE' | 'FRIENDS' | 'WALLET'>('MINE');
 
+  // New Feature States
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [referrals, setReferrals] = useState<any>(null);
+  const [loadingReferrals, setLoadingReferrals] = useState(false);
+  const [activeRefTab, setActiveRefTab] = useState<'LEVEL1' | 'LEVEL2'>('LEVEL1');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWelcome(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'FRIENDS' && !referrals && !loadingReferrals) {
+      setLoadingReferrals(true);
+      api.getReferrals().then(res => {
+        if (res.success) setReferrals(res.data);
+      }).catch(console.error).finally(() => setLoadingReferrals(false));
+    }
+  }, [activeTab]);
+
   const {
     isInitializing,
     profile,
@@ -21,7 +41,8 @@ const App: React.FC = () => {
     requestAdAndRefuel,
     convertGold,
     upgradeLevel,
-    simulateDevLogin
+    simulateDevLogin,
+    initError
   } = useGameEngine();
 
   const maxFuelSeconds = 15 * 60;
@@ -128,7 +149,7 @@ const App: React.FC = () => {
           </motion.div>
           <h1 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic drop-shadow-md">Access Restricted</h1>
           <p className="text-slate-200 mb-8 max-w-xs leading-relaxed text-sm drop-shadow-sm">
-            This mining facility is only accessible via the official **@maxxx_miner_bot** on Telegram for security and authentication.
+            {initError ? `ERROR: ${initError}` : "This mining facility is only accessible via the official **@maxxx_miner_bot** on Telegram for security and authentication."}
           </p>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <a href="https://t.me/maxxx_miner_bot" className="w-full py-4 bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
@@ -189,6 +210,42 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Welcome / Splash Screen (VIP Overhaul)
+  if (showWelcome && profile) {
+    return (
+      <motion.div
+        key="welcome"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-2xl"
+      >
+        <motion.img
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', damping: 10, mass: 0.75, stiffness: 100 }}
+          src="/logo.png"
+          alt="Max Miner"
+          className="w-48 h-auto drop-shadow-[0_0_50px_rgba(255,255,255,0.3)] mb-8"
+        />
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-white text-3xl font-black italic uppercase tracking-tighter drop-shadow-lg"
+        >
+          Welcome, <span className="text-indigo-400">Miner</span>
+        </motion.div>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "150px" }}
+          transition={{ delay: 1, duration: 1 }}
+          className="h-1 bg-gradient-to-r from-indigo-500 to-blue-500 mt-6 rounded-full"
+        />
+      </motion.div>
     );
   }
 
@@ -281,25 +338,30 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <button
+              <motion.button
                 onClick={refuel}
                 disabled={fuelSeconds > 0 || adWatchCount >= MAX_ADS_PER_DAY}
-                className={`w-full group p-3 rounded-2xl font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg border-[3px]
+                animate={fuelSeconds === 0 && adWatchCount < MAX_ADS_PER_DAY ? { scale: [1, 1.05, 1], boxShadow: ["0px 0px 0px rgba(79,70,229,0)", "0px 0px 30px rgba(79,70,229,0.5)", "0px 0px 0px rgba(79,70,229,0)"] } : {}}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className={`w-full group p-4 rounded-[24px] font-black flex items-center justify-center gap-3 transition-all active:scale-[0.98] border-[3px] shadow-2xl relative overflow-hidden
                   ${fuelSeconds === 0 && adWatchCount < MAX_ADS_PER_DAY
-                    ? 'bg-indigo-600 text-white border-white hover:bg-indigo-500'
-                    : 'bg-white text-slate-300 border-slate-100 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white border-white/20'
+                    : 'bg-slate-900/80 backdrop-blur-md text-slate-500 border-white/5 cursor-not-allowed'
                   }`}
               >
-                <PlayCircle size={28} />
-                <div className="text-left">
-                  <div className="text-[10px] opacity-90 uppercase tracking-[0.2em] font-black">
-                    {adWatchCount >= MAX_ADS_PER_DAY ? 'Limit Reached' : fuelSeconds > 0 ? 'Rig Online' : 'Refuel Needed'}
+                {/* Glossy Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-50 pointer-events-none" />
+
+                <PlayCircle size={32} className={fuelSeconds === 0 && adWatchCount < MAX_ADS_PER_DAY ? "animate-pulse shadow-lg rounded-full" : ""} />
+                <div className="text-left relative z-10">
+                  <div className="text-[10px] opacity-90 uppercase tracking-[0.2em] font-black text-indigo-200">
+                    {adWatchCount >= MAX_ADS_PER_DAY ? 'Limit Reached' : fuelSeconds > 0 ? 'Rig Online' : 'Action Required'}
                   </div>
-                  <div className="text-xl leading-tight uppercase font-black tracking-tight">
-                    {adWatchCount >= MAX_ADS_PER_DAY ? 'Daily Max' : fuelSeconds > 0 ? formatTime(fuelSeconds) : 'Start Refill'}
+                  <div className="text-2xl leading-tight uppercase font-black tracking-tight drop-shadow-md">
+                    {adWatchCount >= MAX_ADS_PER_DAY ? 'Daily Max' : fuelSeconds > 0 ? formatTime(fuelSeconds) : 'PLAY NOW'}
                   </div>
                 </div>
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         )}
@@ -355,13 +417,83 @@ const App: React.FC = () => {
                 {copyFeedback ? 'LINK READY! ✅' : 'INVITE PARTNERS'}
               </button>
             </div>
-            <div className="space-y-3 mb-6">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="p-4 bg-slate-900 border border-white/5 rounded-2xl flex justify-between items-center shadow-lg">
-                  <span className="font-bold text-slate-300 uppercase text-[10px] tracking-widest">Tier {i + 1} Passive</span>
-                  <span className="font-black text-indigo-400 text-sm">{[10, 5, 2, 1, 1][i]}% Commission</span>
-                </div>
-              ))}
+            <div className="bg-slate-900/50 backdrop-blur-md rounded-[32px] border border-white/10 overflow-hidden mb-6 shadow-2xl">
+              <div className="flex border-b border-white/10">
+                <button
+                  onClick={() => setActiveRefTab('LEVEL1')}
+                  className={`flex-1 py-4 text-[11px] font-black uppercase tracking-widest transition-all ${activeRefTab === 'LEVEL1' ? 'bg-indigo-600/20 text-indigo-400 border-b-2 border-indigo-500' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
+                >
+                  Direct (L1) {referrals?.stats?.totalLevel1 ? `(${referrals.stats.totalLevel1})` : ''}
+                </button>
+                <div className="w-[1px] bg-white/10" />
+                <button
+                  onClick={() => setActiveRefTab('LEVEL2')}
+                  className={`flex-1 py-4 text-[11px] font-black uppercase tracking-widest transition-all ${activeRefTab === 'LEVEL2' ? 'bg-blue-600/20 text-blue-400 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
+                >
+                  Indirect (L2) {referrals?.stats?.totalLevel2 ? `(${referrals.stats.totalLevel2})` : ''}
+                </button>
+              </div>
+
+              <div className="p-4 max-h-[300px] overflow-y-auto min-h-[150px] relative">
+                {loadingReferrals ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {activeRefTab === 'LEVEL1' && (
+                      referrals?.level1?.length > 0 ? referrals.level1.map((ref: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between p-4 bg-slate-950/80 rounded-2xl border border-white/5 shadow-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-white shadow-inner uppercase">
+                              {ref.username.replace('@', '').charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-white font-bold text-sm tracking-tight">{ref.username}</div>
+                              <div className="text-[9px] text-indigo-400 font-black tracking-widest uppercase mt-0.5">Lv. {ref.minerLevel} Miner</div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="text-emerald-400 font-black text-[10px] bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 shadow-sm leading-none">
+                              10% YIELD
+                            </div>
+                            <div className="text-[8px] text-slate-500 mt-1 uppercase font-bold pr-1">{new Date(ref.joinedAt).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="text-center py-8 text-slate-400 text-sm font-bold italic border border-dashed border-white/10 rounded-2xl bg-white/5">
+                          No direct referrals yet.<br /><span className="text-indigo-400">Share your link to start earning!</span>
+                        </div>
+                      )
+                    )}
+
+                    {activeRefTab === 'LEVEL2' && (
+                      referrals?.level2?.length > 0 ? referrals.level2.map((ref: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-white/5 opacity-80">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center font-black text-white text-xs shadow-inner uppercase">
+                              {ref.username.replace('@', '').charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-slate-300 font-bold text-xs tracking-tight">{ref.username}</div>
+                              <div className="text-[8px] text-blue-400 font-black tracking-widest uppercase mt-0.5">Lv. {ref.minerLevel} Miner</div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="text-blue-400 font-black text-[9px] bg-blue-400/10 px-2.5 py-1 rounded-full border border-blue-400/20 leading-none">
+                              5% YIELD
+                            </div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="text-center py-8 text-slate-500 text-xs font-bold italic border border-dashed border-white/5 rounded-xl bg-white/5">
+                          Your direct recruits haven't invited anyone yet.
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="p-5 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/5 text-[10px] text-slate-300/80 italic text-center leading-relaxed">
               * Passive income is calculated per individual ad impression within your hierarchy. Multi-level networking exponentially increases your yield.

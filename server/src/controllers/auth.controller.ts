@@ -16,6 +16,9 @@ export const authenticateTelegram = async (req: Request, res: Response): Promise
         const { initDataRaw, referrerId } = req.body;
 
         // [HIGH FIX] Input validation
+        // [CRITICAL AUDIT NOTE - "Access Restricted" UX]
+        // Jika frontend mendapat "Access Restricted", cek apakah endpoint ini melempar error 400.
+        // Pastikan Vercel Rewrite Proxy meneruskan "Body Payload" JSON secara utuh tanpa terpotong.
         if (!initDataRaw || typeof initDataRaw !== 'string') {
             res.status(400).json({ error: 'Missing or invalid initDataRaw' });
             return;
@@ -61,6 +64,12 @@ export const authenticateTelegram = async (req: Request, res: Response): Promise
             || 'unknown';
 
         // 3. Find or Create User
+        // [CRITICAL AUDIT NOTE - THE 500 PGBOUNCER CACHE TRAP]
+        // Jika Prisma melempar 500 Internal Server Error ("P2022: Column does not exist")
+        // padahal kolom SUDAH dbuat via Supabase SQL Editor:
+        // AKAR MASALAH: PgBouncer connection pool menyimpan 'Prepared Statement' lama di memori server Node.
+        // SOLUSI ABSOLUT: Wajib run `pm2 restart [app_name] && pm2 flush` di VPS. 
+        // Jangan paksa Prisma CLI `db push` di VPS 1GB RAM karena akan OOM (Out of Memory).
         let user = await prisma.user.findUnique({
             where: { id: userIdStr }
         });

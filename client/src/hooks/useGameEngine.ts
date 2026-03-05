@@ -10,6 +10,7 @@ export function useGameEngine() {
 
     // Mystery Box State (pass to UI)
     const [lootboxData, setLootboxData] = useState<any>(null);
+    const [initError, setInitError] = useState<string | null>(null);
 
     const lastSyncTimeRef = useRef(Date.now());
 
@@ -28,10 +29,18 @@ export function useGameEngine() {
             }
 
             // 3. Login with official initData
-            await api.login(initDataRaw, referrerId);
+            const loginRes = await api.login(initDataRaw, referrerId);
+            if (!loginRes.success) {
+                setInitError(loginRes.error || "Login failed");
+                return;
+            }
             await refreshProfile();
-        } catch (e) {
+
+            // 4. Signal readiness to Telegram
+            if (tg?.ready) tg.ready();
+        } catch (e: any) {
             console.error("Initialization failed:", e);
+            setInitError(e.message || "Network Error");
         } finally {
             setIsInitializing(false);
         }
@@ -226,6 +235,7 @@ export function useGameEngine() {
         fuelSeconds,
         lootboxData,
         setLootboxData,
+        initError,
         refreshProfile,
         requestAdAndRefuel,
         convertGold,

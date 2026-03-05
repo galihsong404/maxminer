@@ -52,6 +52,10 @@ class Api {
         return this.request('/user/profile');
     }
 
+    async getReferrals() {
+        return this.request('/user/referrals');
+    }
+
     async requestAd() {
         return this.request('/ad/request', { method: 'POST' });
     }

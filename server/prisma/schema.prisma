@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -33,6 +34,7 @@ model User {
   
   // Anti-Cheat
   fraudScore            Int           @default(0)
+  isBanned              Boolean       @default(false)
   lastLoginIp           String?       // [MEDIUM FIX #2] Track IP on auth
 
   // Referral System (Self-relation)
@@ -125,6 +127,7 @@ enum RewardType {
 
 enum WithdrawStatus {
   PENDING
+  APPROVED
   COMPLETED
   FAILED
 }

@@ -14,6 +14,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
         const profile = await prisma.user.findUnique({
             where: { id: userId },
             select: {
+                id: true, // [FAST FIX] Expose ID to frontend to fix undefined invite links
                 minerLevel: true,
                 goldBalance: true,
                 maxBalance: true,
@@ -80,6 +81,57 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
         });
     } catch (error) {
         console.error('Profile Fetch Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+export const getReferrals = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        // [VIP FEATURE] Fetch Level 1 (Direct Downlines)
+        const level1Users = await prisma.user.findMany({
+            where: { referrerId: userId },
+            select: { id: true, telegramUsername: true, minerLevel: true, createdAt: true },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        const level1Ids = level1Users.map(u => u.id);
+
+        // [VIP FEATURE] Fetch Level 2 (Indirect Downlines) in one optimized blast
+        let level2Users: any[] = [];
+        if (level1Ids.length > 0) {
+            level2Users = await prisma.user.findMany({
+                where: { referrerId: { in: level1Ids } },
+                select: { id: true, telegramUsername: true, minerLevel: true, createdAt: true },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
+
+        // Formatter: Hide raw ID, prioritize Username
+        const formatUser = (u: any) => ({
+            username: u.telegramUsername ? `@${u.telegramUsername}` : `Miner_${u.id.substring(0, 4)}`,
+            minerLevel: u.minerLevel,
+            joinedAt: u.createdAt
+        });
+
+        res.status(200).json({
+            success: true,
+            data: {
+                level1: level1Users.map(formatUser),
+                level2: level2Users.map(formatUser),
+                stats: {
+                    totalLevel1: level1Users.length,
+                    totalLevel2: level2Users.length
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Referral Fetch Error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
