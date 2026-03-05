@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #FFD700;
+  --color-bg-dark: #0f172a;
+}
+
+body {
+  background-color: var(--tg-theme-bg-color, var(--color-bg-dark));
+  color: var(--tg-theme-text-color, white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

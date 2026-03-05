@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                    String        @id // Telegram ID
+  telegramUsername      String?
+  isPremium             Boolean       @default(false)
+  
+  // TLT System & Progression
+  minerLevel            Int           @default(1)
+  
+  // Balances (Server-Authoritative)
+  goldBalance           BigInt        @default(0)
+  maxBalance            Decimal       @default(0) @db.Decimal(18, 2)
+  
+  // Fuel Mechanics (Server-Side Calculation)
+  // Fuel remaining = max(0, 900 - (now - fuelUpdatedAt))
+  fuelUpdatedAt         DateTime      @default(now())
+  
+  // [CRITICAL FIX #4] REMOVED adWatchCountToday — use rolling 24h COUNT(AdSession) instead
+  // Ad tracking is now done by querying AdSession records within last 24 hours
+  lastAdWatch           DateTime?
+  
+  // Anti-Cheat
+  fraudScore            Int           @default(0)
+  lastLoginIp           String?       // [MEDIUM FIX #2] Track IP on auth
+
+  // Referral System (Self-relation)
+  referrerId            String?       
+  referrer              User?         @relation("UserToReferrer", fields: [referrerId], references: [id])
+  downlines             User[]        @relation("UserToReferrer")
+
+  // [MEDIUM FIX #1] Withdrawal Cooldown Tracking
+  lastWithdrawAt        DateTime?
+
+  // Timestamps
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  // Data Relations
+  transactions          Transaction[]
+  adSessions            AdSession[]
+  withdrawals           Withdrawal[]
+
+  @@index([referrerId]) // [MEDIUM FIX M1] For efficient referral chain walks
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        TxType
+  amount      Decimal  @db.Decimal(18, 2)
+  currency    Currency
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, type])
+  @@index([userId, createdAt]) // For rolling window queries
+}
+
+model AdSession {
+  sessionId   String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  ipAddress   String?
+  status      SessionStatus @default(PENDING)
+  rewardType  RewardType?
+  createdAt   DateTime     @default(now())
+  completedAt DateTime?
+
+  @@index([userId, status])
+  @@index([userId, createdAt]) // [CRITICAL FIX #4] For rolling 24h ad count query
+}
+
+// [MEDIUM FIX #1] Withdrawal model for cooldown enforcement
+model Withdrawal {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Decimal  @db.Decimal(18, 2)
+  fee         Decimal  @db.Decimal(18, 2)
+  walletAddress String
+  status      WithdrawStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+
+  @@index([userId, createdAt])
+}
+
+enum TxType {
+  GOLD_MINE
+  BOX_OPEN
+  CONVERT
+  WITHDRAW
+  REFERRAL_PAYOUT
+  UPGRADE
+}
+
+enum Currency {
+  GOLD
+  MAX
+}
+
+enum SessionStatus {
+  PENDING
+  VALIDATED
+  REJECTED
+}
+
+enum RewardType {
+  VALUED
+  NOT_VALUED
+}
+
+enum WithdrawStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
