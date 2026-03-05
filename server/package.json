@@ -5,7 +5,8 @@
     "main": "src/index.ts",
     "scripts": {
         "start": "ts-node src/index.ts",
-        "dev": "nodemon src/index.ts"
+        "dev": "nodemon src/index.ts",
+        "postinstall": "prisma generate"
     },
     "dependencies": {
         "@prisma/client": "^5.0.0",
