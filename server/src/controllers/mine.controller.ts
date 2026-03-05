@@ -78,15 +78,23 @@ export const syncMining = async (req: Request, res: Response): Promise<void> => 
                 where: { userId, status: 'VALIDATED', createdAt: { gte: twentyFourHoursAgo } }
             });
 
-            let multiplier = 1.0;
-            if (adCountToday >= 40) multiplier = 2.0;
-            else if (adCountToday >= 25) multiplier = 1.5;
-            else if (adCountToday >= 10) multiplier = 1.2;
+            // Calculate active downlines (L1 referrals) for "Referral Power" speed boost (5% per ref)
+            const activeRefsCount = await tx.user.count({
+                where: { referrerId: userId }
+            });
+            const refPowerMultiplier = 1.0 + (activeRefsCount * 0.05);
+
+            let adMultiplier = 1.0;
+            if (adCountToday >= 40) adMultiplier = 2.0;
+            else if (adCountToday >= 25) adMultiplier = 1.5;
+            else if (adCountToday >= 10) adMultiplier = 1.2;
+
+            const totalMultiplier = adMultiplier * refPowerMultiplier;
 
             const levelConfig = MINER_LEVEL_CONFIG[user.minerLevel] || MINER_LEVEL_CONFIG[1];
             const baseGoldPerSecond = levelConfig.goldPerHr / 3600;
-            const maxTheoreticalGold = Math.ceil((baseGoldPerSecond * multiplier * elapsedSeconds) * 1.02)
-                + Math.ceil(baseGoldPerSecond * multiplier * 5);
+            const maxTheoreticalGold = Math.ceil((baseGoldPerSecond * totalMultiplier * elapsedSeconds) * 1.02)
+                + Math.ceil(baseGoldPerSecond * totalMultiplier * 5);
 
             let finalGoldToAdd = claimedGold;
             let incrementFraud = false;

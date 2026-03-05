@@ -90,25 +90,50 @@ export function useGameEngine() {
         return () => clearInterval(interval);
     }, [profile, fuelSeconds]);
 
-    // Periodic Backend Sync Loop (every 10s)
+    // Periodic Backend Sync Loop (every 10s) + Unload Sync
     useEffect(() => {
         if (!profile) return;
-        const interval = setInterval(() => {
+
+        const performSync = async () => {
             if (unclaimedGold > 0) {
-                const goldToClaim = unclaimedGold; // snap value
-                api.syncMining(goldToClaim, lastSyncTimeRef.current)
-                    .then(res => {
-                        // deduct claimed amount directly
-                        setUnclaimedGold(curr => Math.max(0, curr - goldToClaim));
-                        lastSyncTimeRef.current = res.serverTime || Date.now();
-
-                        // Optionally hard-sync visual gold to server true value 
-                        // setVisualGold(res.updatedGoldBalance);
-                    }).catch(console.error);
+                const goldToClaim = unclaimedGold;
+                try {
+                    const res = await api.syncMining(goldToClaim, lastSyncTimeRef.current);
+                    setUnclaimedGold(curr => Math.max(0, curr - goldToClaim));
+                    lastSyncTimeRef.current = res.serverTime || Date.now();
+                } catch (e) {
+                    console.error("Sync Error:", e);
+                }
             }
-        }, 10000);
+        };
 
-        return () => clearInterval(interval);
+        const interval = setInterval(performSync, 10000);
+
+        // [HIGH FIX F1] Ensure final sync on app close
+        const handleUnload = () => {
+            if (unclaimedGold > 0) {
+                const payload = JSON.stringify({ claimedGold: unclaimedGold, lastSyncTimestamp: lastSyncTimeRef.current });
+                const token = localStorage.getItem('token');
+
+                // Synchronous fetch attempt (Fire and forget)
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/mine/sync`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: payload,
+                    keepalive: true // Critical for unload requests
+                }).catch(console.error);
+            }
+        };
+
+        window.addEventListener('beforeunload', handleUnload);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('beforeunload', handleUnload);
+        };
     }, [profile, unclaimedGold]);
 
     const requestAdAndRefuel = async () => {

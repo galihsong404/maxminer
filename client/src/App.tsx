@@ -157,13 +157,35 @@ const App: React.FC = () => {
           <div className="absolute inset-0 bg-slate-950/20" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center bg-slate-950/40 backdrop-blur-md px-10 py-12 rounded-[50px] border border-white/5">
-          <motion.div animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }} transition={{ repeat: Infinity, duration: 2 }} className="mb-8">
-            <img src="/logo.png" alt="Logo" className="h-24 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
+        <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center">
+          <motion.div
+            animate={{
+              scale: [1, 1.08, 1],
+              opacity: [0.9, 1, 0.9]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 3,
+              ease: "easeInOut"
+            }}
+            className="mb-12 w-full max-w-[280px]"
+          >
+            <img src="/logo.png" alt="Max Miner Logo" className="w-full h-auto object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" />
           </motion.div>
-          <div className="flex items-center gap-2 text-indigo-400 font-black tracking-widest uppercase text-xs">
-            <Loader2 className="animate-spin w-4 h-4" />
-            Loading Mining Operations...
+
+          <div className="absolute bottom-12 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-3 text-indigo-400 font-black tracking-[0.3em] uppercase text-[10px]">
+              <Loader2 className="animate-spin w-4 h-4" />
+              Initializing Base Operations
+            </div>
+            <div className="h-1 w-32 bg-white/5 rounded-full overflow-hidden border border-white/10">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 3 }}
+                className="h-full bg-gradient-to-r from-indigo-500 to-blue-500"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -173,92 +195,73 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30">
 
-      {/* Dynamic Background */}
       <div className="fixed inset-0 z-0">
         <img
-          src="/src/assets/mine-bg.png"
+          src="/mine_bg.png"
           alt="Mine Background"
-          className="w-full h-full object-cover opacity-30"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90" />
       </div>
 
-      <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col p-4">
-        <header className="flex justify-between items-center py-4 mb-4">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Max Miner Logo" className="h-10 object-contain drop-shadow-xl" />
+      <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pt-3 px-3">
+        <header className="flex justify-between items-center mb-4">
+          <div className="flex items-center -ml-7">
+            <img src="/logo.png" alt="Max Miner Logo" className="h-[68px] object-contain drop-shadow-xl" />
           </div>
-          <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center gap-2 shadow-lg">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-black text-slate-900 uppercase">Online</span>
+          <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2 shadow-lg">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-black text-slate-900 uppercase">Online</span>
           </div>
         </header>
 
         {activeTab === 'MINE' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-hidden pb-1">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-hidden pb-20">
 
-            {/* Top Info Cards - Ultra Compressed */}
-            <div className="grid grid-cols-2 gap-2 mb-2">
-              <div className="bg-white border-2 border-indigo-100 p-2 rounded-xl flex flex-col items-center shadow-md">
-                <span className="text-[8px] text-indigo-500 font-black uppercase tracking-widest mb-0.5">Gold Vault</span>
-                <span className="text-lg font-black text-indigo-900 leading-none">{Math.floor(goldBalance).toLocaleString()}</span>
+            {/* Top Info Cards - Compact */}
+            <div className="grid grid-cols-2 gap-2 mb-1">
+              <div className="bg-white p-2 rounded-2xl flex flex-col items-center shadow-lg">
+                <span className="text-[8px] text-amber-600 font-black uppercase tracking-widest mb-0.5">Gold Vault</span>
+                <span className="text-lg font-black text-slate-900 leading-none">{Math.floor(goldBalance).toLocaleString()}</span>
               </div>
-              <div className="bg-indigo-600 border-2 border-indigo-500 p-2 rounded-xl flex flex-col items-center shadow-md">
-                <span className="text-[8px] text-white/90 font-black uppercase tracking-widest mb-0.5">Max Tokens</span>
-                <span className="text-lg font-black text-white leading-none">{maxBalance.toFixed(1)}</span>
+              <div className="bg-white p-2 rounded-2xl flex flex-col items-center shadow-lg">
+                <span className="text-[8px] text-indigo-600 font-black uppercase tracking-widest mb-0.5">Max Tokens</span>
+                <span className="text-lg font-black text-slate-900 leading-none">{maxBalance.toFixed(1)}</span>
               </div>
             </div>
 
-            {/* Central Area - Compressed sizes and margins */}
-            <div className="flex-1 flex flex-col items-center justify-center relative min-h-[140px]">
-              <div className="absolute top-0 w-full text-center z-20">
-                <div className="bg-slate-950/95 border border-indigo-500/50 px-3 py-1 rounded-2xl shadow-xl inline-flex flex-col items-center">
-                  <div className="inline-block bg-indigo-600 px-2 py-0.5 rounded-full text-[8px] font-black text-white uppercase tracking-widest shadow-sm">
-                    Level {currentLevelInfo.level}
-                  </div>
-                  <div className="text-base text-white font-black tracking-tighter italic leading-tight my-0.5">
-                    +{(currentLevelInfo.goldPerHr * adTier.multiplier).toLocaleString()} <span className="text-indigo-400 text-[9px]">/ Hr</span>
-                  </div>
-                  <div className={`px-2 py-[2px] rounded font-black ${adTier.bg} ${adTier.color} uppercase text-[7px] tracking-widest shadow-sm border border-white/5`}>
-                    {adTier.name} x{adTier.multiplier.toFixed(1)}
-                  </div>
+            {/* Central Area - Level Info + Logo */}
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {/* Level Info Box - Royal Blue Solid */}
+              <div className="bg-blue-600 px-4 py-1.5 rounded-2xl inline-flex flex-col items-center shadow-lg mb-6 -mt-8 border border-white/20">
+                <div className="inline-block bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 py-0.5 rounded-full text-[8px] font-black text-slate-950 uppercase tracking-widest">
+                  Level {currentLevelInfo.level}
+                </div>
+                <div className="text-base text-white font-black tracking-tighter italic leading-tight my-0.5">
+                  +{(currentLevelInfo.goldPerHr * adTier.multiplier).toLocaleString()} <span className="text-blue-200 text-[9px]">/ Hr</span>
+                </div>
+                <div className={`px-2 py-[2px] rounded font-black ${adTier.bg} ${adTier.color} uppercase text-[7px] tracking-widest border border-white/10`}>
+                  {adTier.name} x{adTier.multiplier.toFixed(1)}
                 </div>
               </div>
 
-              {/* Central Pickaxe Logo - Golden Pickaxe (Purple Bg) */}
-              <div className="relative w-36 h-36 mt-8 rounded-full bg-white shadow-[0_0_30px_rgba(255,255,255,0.2)] overflow-hidden flex items-center justify-center">
-                {isConnected && fuelSeconds > 0 && (
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="absolute inset-0 rounded-full border-[3px] border-dashed border-emerald-400/30 z-20" />
-                )}
-
-                {isConnected && fuelSeconds > 0 && (
-                  <motion.div
-                    animate={{
-                      rotate: [0, -15, 10, -5, 0],
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{
-                      duration: 0.5,
-                      repeat: Infinity,
-                      repeatType: "reverse"
-                    }}
-                    className="z-10 w-full h-full flex items-center justify-center p-4"
-                  >
-                    <img src="/src/assets/pickaxe.png" alt="Golden Pickaxe" className="w-full h-full object-contain" />
-                  </motion.div>
-                )}
-                {(!isConnected || fuelSeconds <= 0) && (
-                  <div className="z-10 opacity-50 grayscale w-full h-full flex items-center justify-center p-4">
-                    <img src="/src/assets/pickaxe.png" alt="Inactive Pickaxe" className="w-full h-full object-contain" />
-                  </div>
-                )}
-              </div>
+              {/* Pickaxe Logo */}
+              {isConnected && fuelSeconds > 0 ? (
+                <motion.img
+                  src="/pickaxe.png"
+                  alt="Axe"
+                  animate={{ rotate: [0, -10, 6, -3, 0], scale: [1, 1.03, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                  className="w-48 h-48 object-contain"
+                />
+              ) : (
+                <img src="/pickaxe.png" alt="Axe" className="w-48 h-48 object-contain" />
+              )}
             </div>
 
-            {/* Bottom Controls - Ultra Compressed */}
-            <div className="mt-auto space-y-2 relative z-30">
-              <div className="bg-white p-3 rounded-2xl shadow-lg border-2 border-indigo-100">
-                <div className="flex justify-between items-end mb-1.5">
+            {/* Bottom Controls - Flush with Nav */}
+            <div className="mt-auto mb-6 space-y-1 relative z-30">
+              <div className="bg-white p-2 rounded-xl shadow-lg border-2 border-indigo-100">
+                <div className="flex justify-between items-end mb-1">
                   <div>
                     <div className="text-[8px] text-indigo-400 font-black uppercase tracking-widest mb-0.5">Fuel Reserve</div>
                     <div className="text-lg font-black text-indigo-900 italic tracking-tighter leading-none">{formatTime(fuelSeconds)}</div>
@@ -337,7 +340,11 @@ const App: React.FC = () => {
 
         {activeTab === 'FRIENDS' && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 overflow-y-auto pb-8">
-            <h2 className="text-3xl font-black mb-4 italic uppercase tracking-tighter text-white drop-shadow-lg">Referral<span className="text-indigo-400"> Power</span></h2>
+            <div className="mb-4">
+              <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg bg-black/40 backdrop-blur-sm px-4 py-1 rounded-2xl inline-block">
+                Referral<span className="text-indigo-400"> Power</span>
+              </h2>
+            </div>
             <div className="bg-gradient-to-br from-blue-700 to-indigo-900 p-8 rounded-[40px] shadow-2xl mb-6 relative overflow-hidden border border-white/20">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full" />
               <h3 className="text-xl font-black mb-2 drop-shadow-md uppercase italic tracking-tight">Recruit Miners, Earn $MAX</h3>
@@ -350,13 +357,13 @@ const App: React.FC = () => {
             </div>
             <div className="space-y-3 mb-6">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="p-4 bg-blue-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex justify-between items-center shadow-lg">
-                  <span className="font-bold text-blue-200 uppercase text-[10px] tracking-widest">Tier {i + 1} Passive</span>
-                  <span className="font-black text-indigo-300 text-sm">{[10, 5, 2, 1, 1][i]}% Commission</span>
+                <div key={i} className="p-4 bg-slate-900 border border-white/5 rounded-2xl flex justify-between items-center shadow-lg">
+                  <span className="font-bold text-slate-300 uppercase text-[10px] tracking-widest">Tier {i + 1} Passive</span>
+                  <span className="font-black text-indigo-400 text-sm">{[10, 5, 2, 1, 1][i]}% Commission</span>
                 </div>
               ))}
             </div>
-            <div className="p-5 bg-indigo-950/40 backdrop-blur-md rounded-2xl border border-white/5 text-[10px] text-indigo-200/60 italic text-center leading-relaxed">
+            <div className="p-5 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/5 text-[10px] text-slate-300/80 italic text-center leading-relaxed">
               * Passive income is calculated per individual ad impression within your hierarchy. Multi-level networking exponentially increases your yield.
             </div>
           </motion.div>
@@ -396,18 +403,36 @@ const App: React.FC = () => {
           </motion.div>
         )}
 
-        <nav className="fixed bottom-0 left-0 right-0 bg-blue-950/90 backdrop-blur-3xl border-t border-white/20 h-24 px-8 flex justify-between items-center z-50 max-w-md mx-auto rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-indigo-500/20 h-24 px-6 flex justify-between items-center z-50 max-w-md mx-auto rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.4)]">
           {[
-            { id: 'MINE', icon: Star, label: 'Mine' },
-            { id: 'UPGRADE', icon: Rocket, label: 'Boost' },
-            { id: 'FRIENDS', icon: Users, label: 'Ref' },
-            { id: 'WALLET', icon: Coins, label: 'Vault' }
-          ].map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex flex-col items-center gap-2 flex-1 transition-all ${activeTab === tab.id ? 'text-indigo-400 scale-110 drop-shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'text-blue-300/40 hover:text-blue-300'}`}>
-              <tab.icon size={26} fill={activeTab === tab.id ? "currentColor" : "none"} />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">{tab.label}</span>
-            </button>
-          ))}
+            { id: 'MINE', icon: Star, label: 'Mine', color: 'text-amber-400', bg: 'bg-amber-400/10' },
+            { id: 'UPGRADE', icon: Rocket, label: 'Boost', color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
+            { id: 'FRIENDS', icon: Users, label: 'Ref', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+            { id: 'WALLET', icon: Coins, label: 'Vault', color: 'text-sky-400', bg: 'bg-sky-400/10' }
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-300"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="nav-bg"
+                    className={`absolute inset-x-2 inset-y-4 rounded-2xl ${tab.bg} border border-white/5 -z-10`}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <div className={`transition-all duration-300 ${isActive ? `${tab.color} scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]` : 'text-slate-500'}`}>
+                  <tab.icon size={26} fill={isActive ? "currentColor" : "none"} />
+                </div>
+                <span className={`text-[9px] font-black uppercase tracking-widest mt-1 transition-colors duration-300 ${isActive ? tab.color : 'text-slate-500'}`}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </nav>
       </div>
 

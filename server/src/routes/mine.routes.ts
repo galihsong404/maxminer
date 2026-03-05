@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { syncMining } from '../controllers/mine.controller';
 import { authenticateJWT } from '../middlewares/auth.middleware';
+import { requireNotBanned } from '../middlewares/antiCheat.middleware';
 import { redis } from '../config/redis';
 
 // [HIGH FIX H1] Rate limiter for mine/sync — max 1 request per 5 seconds per user
@@ -21,6 +22,6 @@ const mineSyncRateLimit = async (req: Request, res: Response, next: NextFunction
 
 const router = Router();
 
-router.post('/sync', authenticateJWT, mineSyncRateLimit, syncMining);
+router.post('/sync', authenticateJWT, requireNotBanned, mineSyncRateLimit, syncMining);
 
 export default router;

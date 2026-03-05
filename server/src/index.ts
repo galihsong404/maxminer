@@ -19,6 +19,10 @@ app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || '*' })); // Restrict in production
 app.use(express.json({ limit: '10kb' })); // [HIGH FIX #2] Prevent memory exhaustion DoS
 
+import { rateLimit } from './middlewares/rateLimit.middleware';
+// Apply global rate limit (e.g., 200 requests per 15 mins per IP)
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
+
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import adRoutes from './routes/ad.routes';
@@ -35,6 +39,12 @@ app.use('/api/economy', economyRoutes);
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'W2E Miner API is running.' });
 });
+
+import { startPayoutService } from './services/payout.service';
+// Start Background Worker for Withdrawals
+if (process.env.NODE_ENV === 'production' || process.env.ENABLE_PAYOUTS === 'true') {
+    startPayoutService();
+}
 
 // Start Server
 app.listen(PORT, () => {

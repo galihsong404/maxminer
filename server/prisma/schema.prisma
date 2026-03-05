@@ -33,6 +33,7 @@ model User {
   
   // Anti-Cheat
   fraudScore            Int           @default(0)
+  isBanned              Boolean       @default(false)
   lastLoginIp           String?       // [MEDIUM FIX #2] Track IP on auth
 
   // Referral System (Self-relation)
@@ -125,6 +126,7 @@ enum RewardType {
 
 enum WithdrawStatus {
   PENDING
+  APPROVED
   COMPLETED
   FAILED
 }
