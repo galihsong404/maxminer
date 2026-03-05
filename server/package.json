@@ -2,10 +2,11 @@
     "name": "w2e_max_miner_backend",
     "version": "1.0.0",
     "description": "Backend for $MAX Miner",
-    "main": "src/index.ts",
+    "main": "dist/index.js",
     "scripts": {
-        "start": "ts-node src/index.ts",
+        "start": "node dist/index.js",
         "dev": "nodemon src/index.ts",
+        "build": "tsc",
         "postinstall": "prisma generate"
     },
     "dependencies": {

@@ -171,11 +171,16 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-indigo-500/30 select-none pb-24 relative">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <img src="/mine_bg.png" alt="Background" className="w-full h-full object-cover" />
-        {/* Only subtle bottom fade for navigation contrast */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-slate-950/90 to-transparent" />
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30">
+
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 z-0">
+        <img
+          src="/src/assets/mine-bg.png"
+          alt="Mine Background"
+          className="w-full h-full object-cover opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90" />
       </div>
 
       <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col p-4">
@@ -226,13 +231,27 @@ const App: React.FC = () => {
                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="absolute inset-0 rounded-full border-[3px] border-dashed border-emerald-400/30 z-20" />
                 )}
 
-                <motion.div
-                  animate={isConnected && fuelSeconds > 0 ? { rotate: [-8, 8, -8], scale: [1, 1.05, 1] } : { rotate: 0, scale: 1 }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-                  className="z-10 w-full h-full flex items-center justify-center"
-                >
-                  <img src="/pickaxe.png" alt="Miner Pickaxe" className="w-full h-full object-cover" />
-                </motion.div>
+                {isConnected && fuelSeconds > 0 && (
+                  <motion.div
+                    animate={{
+                      rotate: [0, -15, 10, -5, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      repeat: Infinity,
+                      repeatType: "reverse"
+                    }}
+                    className="z-10 w-full h-full flex items-center justify-center p-4"
+                  >
+                    <img src="/src/assets/pickaxe.png" alt="Golden Pickaxe" className="w-full h-full object-contain" />
+                  </motion.div>
+                )}
+                {(!isConnected || fuelSeconds <= 0) && (
+                  <div className="z-10 opacity-50 grayscale w-full h-full flex items-center justify-center p-4">
+                    <img src="/src/assets/pickaxe.png" alt="Inactive Pickaxe" className="w-full h-full object-contain" />
+                  </div>
+                )}
               </div>
             </div>
 
