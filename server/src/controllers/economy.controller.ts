@@ -24,9 +24,9 @@ export const convertGoldToMax = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        // Must be a positive integer, minimum 50000
-        if (!Number.isInteger(goldAmount) || goldAmount < 50000) {
-            res.status(400).json({ error: 'goldAmount must be a positive integer (minimum 50,000)' });
+        // Must be exactly 50,000 or 500,000
+        if (goldAmount !== 50000 && goldAmount !== 500000) {
+            res.status(400).json({ error: 'Invalid goldAmount. Must be either 50,000 or 500,000.' });
             return;
         }
 

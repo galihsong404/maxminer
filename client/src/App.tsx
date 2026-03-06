@@ -115,12 +115,12 @@ const App: React.FC = () => {
   };
 
   const convertGoldToMax = async () => {
-    if (goldBalance >= 50000) {
-      const result = await convertGold(50000);
+    if (goldBalance >= selectedExchangeAmount) {
+      const result = await convertGold(selectedExchangeAmount);
       if (result) {
         setConversionResult({
           success: result.success,
-          message: result.success ? "Successfully converted 50,000 Gold to 40.0 $MAX!" : (result.error || "Conversion failed")
+          message: result.success ? `Successfully converted ${selectedExchangeAmount.toLocaleString()} Gold to ${(selectedExchangeAmount / 1250).toFixed(1)} $MAX!` : (result.error || "Conversion failed")
         });
         // Auto-hide result after 4 seconds
         setTimeout(() => setConversionResult(null), 4000);
@@ -572,22 +572,38 @@ const App: React.FC = () => {
             <h2 className="text-3xl font-black mb-6 italic uppercase tracking-tighter text-white drop-shadow-lg">Bank<span className="text-indigo-400"> vault</span></h2>
             <div className="bg-blue-950/70 backdrop-blur-xl border border-white/20 p-8 rounded-[40px] mb-6 relative overflow-hidden shadow-2xl">
               <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-6 drop-shadow-sm text-center">Currency Exchange</h3>
+              {/* Amount Selector */}
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setSelectedExchangeAmount(50000)}
+                  className={`flex-1 py-3 rounded-2xl font-black text-[10px] uppercase transition-all border ${selectedExchangeAmount === 50000 ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400' : 'bg-slate-900/50 border-white/5 text-slate-500'}`}
+                >
+                  50K GOLD
+                </button>
+                <button
+                  onClick={() => setSelectedExchangeAmount(500000)}
+                  className={`flex-1 py-3 rounded-2xl font-black text-[10px] uppercase transition-all border ${selectedExchangeAmount === 500000 ? 'bg-sky-500/20 border-sky-500 text-sky-400' : 'bg-slate-900/50 border-white/5 text-slate-500'}`}
+                >
+                  500K GOLD
+                </button>
+              </div>
+
               <div className="flex items-center justify-between bg-black/40 p-5 rounded-[30px] mb-6 border border-white/5">
                 <div className="text-center flex-1">
                   <div className="text-[10px] text-indigo-400 font-black uppercase mb-1">PAY GOLD</div>
-                  <div className="text-2xl font-black text-white">50,000</div>
+                  <div className="text-2xl font-black text-white">{selectedExchangeAmount.toLocaleString()}</div>
                 </div>
                 <div className="px-4"><ArrowRight className="text-indigo-500" size={24} /></div>
                 <div className="text-center flex-1">
                   <div className="text-[10px] text-sky-400 font-black uppercase mb-1">GET $MAX</div>
-                  <div className="text-2xl font-black text-white">40.0</div>
+                  <div className="text-2xl font-black text-white">{(selectedExchangeAmount / 1250).toFixed(1)}</div>
                 </div>
               </div>
               <button
                 onClick={convertGoldToMax}
-                disabled={goldBalance < 50000 || isConverting}
+                disabled={goldBalance < selectedExchangeAmount || isConverting}
                 className={`w-full py-4 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2
-                  ${goldBalance >= 50000 && !isConverting ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-900/50 text-slate-500 cursor-not-allowed border border-white/5'}`}
+                  ${goldBalance >= selectedExchangeAmount && !isConverting ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-900/50 text-slate-500 cursor-not-allowed border border-white/5'}`}
               >
                 {isConverting ? (
                   <>
