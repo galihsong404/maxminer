@@ -154,35 +154,55 @@ export function useGameEngine() {
                 const preGold = Number(profile.goldBalance);
                 const preMax = Number(profile.maxBalance);
 
-                // SIMULATE S2S CALLBACK (Dev Mode Only)
-                await api.simulateAdCallback(res.sessionId, profile.id || '28491022', 'valued');
+                // 🚀 MONETAG REAL AD INTEGRATION
+                // Open real Ad Link in a new tab with telegram_id and session_id tracking
+                const monetagDirectLink = 'https://omg10.com/4/10688253';
+                const telegramId = profile.id || 'unknown';
+                const adUrl = `${monetagDirectLink}?telegram_id=${telegramId}&request_var=${res.sessionId}`;
 
-                // Poll server a moment later to get updated balances
-                setTimeout(async () => {
+                window.open(adUrl, '_blank');
+
+                // Poll server every 3 seconds to check if Monetag Webhook arrived (Max 1 minute)
+                let pollAttempts = 0;
+                const maxAttempts = 20; // 3 sec * 20 = 60 seconds max
+
+                const pollInterval = setInterval(async () => {
+                    pollAttempts++;
                     const updated = await api.getProfile();
+
                     if (updated.success) {
-                        setProfile(updated.data);
+                        const postFuel = Number(updated.data.fuel.remainingSeconds);
                         const postGold = Number(updated.data.goldBalance);
                         const postMax = Number(updated.data.maxBalance);
 
-                        // Calculate Box Reward dynamically from backend increments
-                        const diffGold = postGold - preGold;
-                        const diffMax = postMax - preMax;
+                        // If fuel updated, the Ad Webhook was successful
+                        if (postFuel > 0) {
+                            clearInterval(pollInterval);
+                            setProfile(updated.data);
 
-                        if (diffMax > 0 || diffGold > 0) {
-                            setLootboxData({
-                                type: diffMax > 0 ? 'MAX' : 'GOLD',
-                                amount: diffMax > 0 ? diffMax : diffGold,
-                                label: diffMax > 0 ? 'Token Reward' : 'Bonus Gold' // We can refine label later
-                            });
+                            // Calculate Box Reward dynamically from backend increments
+                            const diffGold = postGold - preGold;
+                            const diffMax = postMax - preMax;
+
+                            if (diffMax > 0 || diffGold > 0) {
+                                setLootboxData({
+                                    type: diffMax > 0 ? 'MAX' : 'GOLD',
+                                    amount: diffMax > 0 ? diffMax : diffGold,
+                                    label: diffMax > 0 ? 'Token Reward' : 'Bonus Gold'
+                                });
+                            }
+
+                            setVisualGold(postGold);
+                            setFuelSeconds(postFuel);
+                            setUnclaimedGold(0);
+                            lastSyncTimeRef.current = Date.now();
+                        } else if (pollAttempts >= maxAttempts) {
+                            // Stop polling if user abandoned the ad or it failed
+                            clearInterval(pollInterval);
+                            console.log("Ad validation timed out.");
                         }
-
-                        setVisualGold(postGold);
-                        setFuelSeconds(updated.data.fuel.remainingSeconds);
-                        setUnclaimedGold(0);
-                        lastSyncTimeRef.current = Date.now();
                     }
-                }, 1500);
+                }, 3000); // Poll every 3 seconds
 
                 return true;
             }

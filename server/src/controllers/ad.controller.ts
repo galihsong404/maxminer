@@ -71,9 +71,11 @@ export const requestAd = async (req: Request, res: Response): Promise<void> => {
 
 export const adNetworkCallback = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { custom, uid, reward_event_type, hmac } = req.query;
+        const { custom, uid, reward_event_type } = req.query;
 
-        if (!custom || !uid || !hmac) {
+        // Monetag TMA (Telegram Mini Apps) direct links do not provide an HMAC signature.
+        // Security relies entirely on the short-lived UUID sessionId matching the user.
+        if (!custom || !uid || !reward_event_type) {
             res.status(400).send('Missing parameters');
             return;
         }
@@ -82,23 +84,6 @@ export const adNetworkCallback = async (req: Request, res: Response): Promise<vo
         const userId = uid as string;
         const rewardType = reward_event_type as string;
 
-        /*
-         * GATE #5: HMAC VERIFICATION
-         */
-        const dataCheckString = `uid=${userId}&custom=${sessionId}&reward_event_type=${rewardType}`;
-        const calculatedHmac = crypto.createHmac('sha256', MONETAG_SECRET).update(dataCheckString).digest('hex');
-
-        const providedHmacBuffer = Buffer.from(hmac as string, 'hex');
-        const calculatedHmacBuffer = Buffer.from(calculatedHmac, 'hex');
-
-        if (providedHmacBuffer.length !== calculatedHmacBuffer.length || !crypto.timingSafeEqual(providedHmacBuffer, calculatedHmacBuffer)) {
-            if (process.env.NODE_ENV === 'production' || MONETAG_SECRET !== 'test_secret') {
-                console.warn(`[GATE #5 FAILED] Invalid HMAC for session ${sessionId}`);
-                res.status(403).send('Invalid signature');
-                return;
-            }
-        }
-
         const session = await prisma.adSession.findUnique({ where: { sessionId } });
 
         if (!session || session.status !== 'PENDING' || session.userId !== userId) {
@@ -106,8 +91,8 @@ export const adNetworkCallback = async (req: Request, res: Response): Promise<vo
             return;
         }
 
-        // Determine if this is a VALUED impression
-        const isValued = rewardType === 'valued';
+        // Determine if this is a VALUED impression (Monetag sends 'yes' or 'no')
+        const isValued = rewardType === 'yes';
 
         await prisma.$transaction(async (tx: any) => {
             // 1. Mark session as validated

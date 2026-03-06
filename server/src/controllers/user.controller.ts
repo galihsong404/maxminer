@@ -57,6 +57,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
         res.status(200).json({
             success: true,
             data: {
+                id: profile.id, // [HOTFIX] Expose ID to frontend to fix undefined invite links
                 minerLevel: profile.minerLevel,
                 goldBalance: profile.goldBalance.toString(),
                 maxBalance: profile.maxBalance,
@@ -100,13 +101,15 @@ export const getReferrals = async (req: Request, res: Response): Promise<void> =
             orderBy: { createdAt: 'desc' }
         });
 
-        const level1Ids = level1Users.map(u => u.id);
+        const usersByLevel: any[][] = [level1Users, [], [], [], []];
 
-        // [VIP FEATURE] Fetch Level 2 (Indirect Downlines) in one optimized blast
-        let level2Users: any[] = [];
-        if (level1Ids.length > 0) {
-            level2Users = await prisma.user.findMany({
-                where: { referrerId: { in: level1Ids } },
+        // Iteratively fetch L2 to L5 in optimized batches
+        for (let i = 0; i < 4; i++) {
+            const parentIds = usersByLevel[i].map(u => u.id);
+            if (parentIds.length === 0) break;
+
+            usersByLevel[i + 1] = await prisma.user.findMany({
+                where: { referrerId: { in: parentIds } },
                 select: { id: true, telegramUsername: true, minerLevel: true, createdAt: true },
                 orderBy: { createdAt: 'desc' }
             });
@@ -122,11 +125,17 @@ export const getReferrals = async (req: Request, res: Response): Promise<void> =
         res.status(200).json({
             success: true,
             data: {
-                level1: level1Users.map(formatUser),
-                level2: level2Users.map(formatUser),
+                level1: usersByLevel[0].map(formatUser),
+                level2: usersByLevel[1].map(formatUser),
+                level3: usersByLevel[2].map(formatUser),
+                level4: usersByLevel[3].map(formatUser),
+                level5: usersByLevel[4].map(formatUser),
                 stats: {
-                    totalLevel1: level1Users.length,
-                    totalLevel2: level2Users.length
+                    totalLevel1: usersByLevel[0].length,
+                    totalLevel2: usersByLevel[1].length,
+                    totalLevel3: usersByLevel[2].length,
+                    totalLevel4: usersByLevel[3].length,
+                    totalLevel5: usersByLevel[4].length
                 }
             }
         });
