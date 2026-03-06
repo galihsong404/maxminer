@@ -158,7 +158,7 @@ const App: React.FC = () => {
           <div className="absolute inset-0 bg-slate-950/30 backdrop-blur-[1px]" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center bg-slate-950/60 backdrop-blur-xl p-8 rounded-[40px] border border-white/10 shadow-2xl">
+        <div className="relative z-10 flex flex-col items-center bg-slate-950/60 backdrop-blur-xl p-8 rounded-[40px] border border-white/10 shadow-2xl scale-[0.8]">
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30">
             <ShieldAlert className="text-red-500 w-12 h-12" />
           </motion.div>
@@ -193,7 +193,7 @@ const App: React.FC = () => {
           <div className="absolute inset-0 bg-slate-950/20" />
         </div>
 
-        <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center">
+        <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center scale-[0.8]">
           <motion.div
             animate={{
               scale: [1, 1.05, 1],
@@ -236,7 +236,7 @@ const App: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-2xl"
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-2xl scale-[0.8] origin-center"
       >
         <motion.img
           initial={{ scale: 0.5, opacity: 0 }}
@@ -275,7 +275,7 @@ const App: React.FC = () => {
         />
       </div>
 
-      <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pt-3 px-3">
+      <div className="relative z-10 max-w-lg mx-auto min-h-[125vh] flex flex-col pt-3 px-3 scale-[0.8] origin-top">
         <header className="flex justify-between items-center mb-4">
           <div className="flex items-center -ml-7">
             <img src="/logo.png" alt="Max Miner Logo" className="h-[68px] object-contain drop-shadow-xl" />
