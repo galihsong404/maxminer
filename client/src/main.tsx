@@ -20,9 +20,13 @@ import {
 
 const config = getDefaultConfig({
   appName: 'Watch to Earn MAX Miner',
-  projectId: 'YOUR_PROJECT_ID', // Replace with a real WC project ID
+  projectId: import.meta.env.VITE_PROJECT_ID || 'YOUR_PROJECT_ID',
   chains: [bsc, bscTestnet],
   ssr: false,
+  // Metadata for better Telegram/Mobile deep-linking
+  appDescription: 'Mine $MAX by watching ads in Telegram',
+  appIcon: 'https://w2emaxminer.vercel.app/pickaxe.png', // Corrected path
+  appUrl: 'https://w2emaxminer.vercel.app',
 });
 
 const queryClient = new QueryClient();
