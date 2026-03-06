@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../prisma/client';
 import { validateInitData } from '../utils/telegramAuth';
+import { calculateTLT } from '../utils/tlt';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'test_bot_token';
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_only';
@@ -100,20 +101,7 @@ export const authenticateTelegram = async (req: Request, res: Response): Promise
 
         if (!user) {
             // NEW USER = TELEGRAM LOYALTY TIER (TLT) LOGIC
-            let startingLevel = 1;
-            const idLength = userIdStr.length;
-            const prefix = parseInt(userIdStr[0], 10) || 7;
-
-            if (idLength <= 9) {
-                startingLevel = Math.max(startingLevel, 4);
-            } else if (idLength === 10) {
-                if (prefix >= 1 && prefix <= 3) startingLevel = Math.max(startingLevel, 3);
-                else if (prefix >= 4 && prefix <= 6) startingLevel = Math.max(startingLevel, 2);
-            }
-
-            if (isPremium) {
-                startingLevel = Math.max(startingLevel, 3);
-            }
+            const { level: startingLevel, bonusGold } = calculateTLT(userIdStr, isPremium);
 
             // Referral: only need direct self-ref check + existence check
             // (circular chain is impossible for a new user that doesn't exist in DB yet)
@@ -131,6 +119,7 @@ export const authenticateTelegram = async (req: Request, res: Response): Promise
                     telegramUsername: tgUser.username || null,
                     isPremium: isPremium,
                     minerLevel: startingLevel,
+                    goldBalance: BigInt(bonusGold),
                     referrerId: validReferrerId,
                     lastLoginIp: clientIp
                 }

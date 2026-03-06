@@ -1,5 +1,6 @@
 import { Telegraf, Markup } from 'telegraf';
 import { prisma } from '../prisma/client';
+import { calculateTLT } from '../utils/tlt';
 
 export class BotService {
     private bot: Telegraf;
@@ -28,12 +29,10 @@ export class BotService {
                     where: { id: tgId }
                 });
 
-                if (!user) {
-                    // 2. Determine initial miner level (consistent with auth.controller logic)
-                    // Regular users = Level 0, Premium = Level 1
-                    const isPremium = ctx.from.is_premium || false;
-                    const minerLevel = isPremium ? 1 : 0;
+                const isPremium = ctx.from.is_premium || false;
+                const { level, bonusGold, tierName } = calculateTLT(tgId, isPremium);
 
+                if (!user) {
                     // Referral linkage: Only if startParam is a valid user ID and not self
                     let validReferrerId: string | null = null;
                     if (startParam && startParam !== tgId) {
@@ -50,7 +49,8 @@ export class BotService {
                             id: tgId,
                             telegramUsername: ctx.from.username || null,
                             isPremium: isPremium,
-                            minerLevel: 1, // Lv 1 is default
+                            minerLevel: level,
+                            goldBalance: BigInt(bonusGold),
                             referrerId: validReferrerId
                         }
                     });
@@ -77,6 +77,9 @@ export class BotService {
 
                 await ctx.replyWithHTML(
                     `<b>Welcome to Max Miner, ${username}!</b>\n\n` +
+                    `🎖 <b>Loyalty Tier:</b> ${tierName}\n` +
+                    `⛏ <b>Start Level:</b> Lv. ${level}\n` +
+                    `💰 <b>Initial Reward:</b> ${bonusGold.toLocaleString()} Gold\n\n` +
                     `Start your mining journey and earn $MAX tokens. Keep your rig fueled to maximize yields!`,
                     Markup.inlineKeyboard([
                         [Markup.button.webApp('🚀 PLAY NOW', webAppUrl)]
