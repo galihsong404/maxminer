@@ -265,7 +265,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-amber-500/30">
+    <div className="h-screen overflow-hidden bg-black text-white font-sans selection:bg-amber-500/30">
 
       <div className="fixed inset-0 z-0">
         <img
@@ -275,7 +275,7 @@ const App: React.FC = () => {
         />
       </div>
 
-      <div className="relative z-10 max-w-lg mx-auto min-h-[125vh] flex flex-col pt-3 px-3 scale-[0.8] origin-top">
+      <div className="relative z-10 max-w-lg mx-auto h-[125%] flex flex-col pt-3 px-3 scale-[0.8] origin-top">
         <header className="flex justify-between items-center mb-4">
           <div className="flex items-center -ml-7">
             <img src="/logo.png" alt="Max Miner Logo" className="h-[68px] object-contain drop-shadow-xl" />

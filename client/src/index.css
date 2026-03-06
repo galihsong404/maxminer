@@ -10,7 +10,8 @@ body {
   color: var(--tg-theme-text-color, white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100vh;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -27,6 +28,7 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
