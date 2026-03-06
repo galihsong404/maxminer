@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
-import { Coins, Users, Rocket, PlayCircle, Star, ArrowRight, ShieldAlert, Loader2, ChevronDown, ChevronUp, Shield } from 'lucide-react';
+import { Coins, Users, Rocket, PlayCircle, Star, ArrowRight, ShieldAlert, Loader2, ChevronDown, ChevronUp, Shield, Copy, Wallet } from 'lucide-react';
 import { useGameEngine } from './hooks/useGameEngine';
 import { api } from './api';
 import { AdminView } from './components/AdminView';
@@ -61,6 +61,7 @@ const App: React.FC = () => {
   const maxFuelSeconds = 15 * 60;
   const MAX_ADS_PER_DAY = 50;
   const [selectedExchangeAmount, setSelectedExchangeAmount] = useState<50000 | 500000>(50000);
+  const [manualWithdrawAddress, setManualWithdrawAddress] = useState("");
 
   const goldBalance = visualGold;
   const maxBalance = profile ? Number(profile.maxBalance) : 0;
@@ -632,16 +633,42 @@ const App: React.FC = () => {
             </div>
             <div className="bg-gradient-to-br from-slate-900/90 to-blue-950/90 backdrop-blur-2xl border border-white/10 p-6 rounded-[32px] mb-8 text-center shadow-2xl">
               <p className="text-indigo-200/60 text-[10px] uppercase font-black tracking-widest mb-2">Available Tokens</p>
-              <div className="text-6xl font-black mb-8 text-white drop-shadow-2xl">{maxBalance.toFixed(1)} <span className="text-indigo-400 text-xl font-bold italic lowercase">$max</span></div>
-              {!isConnected ? (
-                <ConnectButton.Custom>
-                  {({ openConnectModal }) => (
-                    <button onClick={openConnectModal} className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-950/40 uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 transition-all">LINK EXTERNAL WALLET</button>
-                  )}
-                </ConnectButton.Custom>
-              ) : (
-                <button disabled={maxBalance < 1000} onClick={() => { const address = prompt("Enter BSC Wallet Address:"); if (address && maxBalance >= 1000) handleWithdrawal(1000, address); }} className={`w-full py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs ${maxBalance >= 1000 ? 'bg-white text-indigo-950 hover:bg-blue-50' : 'bg-slate-900/50 text-slate-500 border border-white/5'}`}>INITIATE WITHDRAWAL (1.0K+)</button>
-              )}
+              <div className="text-6xl font-black mb-6 text-white drop-shadow-2xl">{maxBalance.toFixed(1)} <span className="text-indigo-400 text-xl font-bold italic lowercase">$max</span></div>
+
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="ENTER BSC WALLET ADDRESS"
+                    value={manualWithdrawAddress}
+                    onChange={(e) => setManualWithdrawAddress(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[10px] font-black text-white placeholder:text-slate-600 focus:border-indigo-500/50 transition-all uppercase tracking-widest no-scrollbar"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={async () => { try { const text = await navigator.clipboard.readText(); setManualWithdrawAddress(text); } catch (e) { } }}>
+                    <Copy size={16} className="text-indigo-400" />
+                  </div>
+                </div>
+
+                <button
+                  disabled={maxBalance < 1000 || !manualWithdrawAddress.startsWith('0x') || manualWithdrawAddress.length < 40}
+                  onClick={() => handleWithdrawal(1000, manualWithdrawAddress)}
+                  className={`w-full py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2
+                    ${maxBalance >= 1000 && manualWithdrawAddress.startsWith('0x') ? 'bg-white text-indigo-950 hover:bg-blue-50' : 'bg-slate-900/50 text-slate-500 border border-white/5 cursor-not-allowed'}`}
+                >
+                  <Wallet size={16} />
+                  {maxBalance < 1000 ? 'MIN. 1000 $MAX REQUIRED' : 'INITIATE WITHDRAWAL'}
+                </button>
+
+                {!isConnected && (
+                  <ConnectButton.Custom>
+                    {({ openConnectModal }) => (
+                      <button onClick={openConnectModal} className="w-full py-4 text-indigo-400/60 font-black text-[9px] uppercase tracking-[3px] hover:text-indigo-400 transition-all">
+                        Or Link External Wallet
+                      </button>
+                    )}
+                  </ConnectButton.Custom>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
