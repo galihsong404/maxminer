@@ -569,9 +569,9 @@ const App: React.FC = () => {
         )}
 
         {activeTab === 'WALLET' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 overflow-y-auto pb-32 no-scrollbar min-h-0 flex flex-col">
-            <h2 className="text-3xl font-black mb-6 italic uppercase tracking-tighter text-white drop-shadow-lg">Bank<span className="text-indigo-400"> vault</span></h2>
-            <div className="bg-blue-950/70 backdrop-blur-xl border border-white/20 p-5 md:p-8 rounded-[40px] mb-6 relative overflow-hidden shadow-2xl">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 overflow-y-auto pb-40 no-scrollbar min-h-0">
+            <h2 className="text-2xl font-black mb-4 italic uppercase tracking-tighter text-white drop-shadow-lg px-2">Bank<span className="text-indigo-400"> vault</span></h2>
+            <div className="bg-blue-950/70 backdrop-blur-xl border border-white/20 p-4 md:p-8 rounded-[40px] mb-6 relative shadow-2xl">
               <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-6 drop-shadow-sm text-center">Currency Exchange</h3>
               {/* Amount Selector */}
               <div className="flex gap-2 mb-6">
@@ -589,21 +589,21 @@ const App: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between bg-black/40 p-4 rounded-[24px] mb-6 border border-white/5 gap-2">
+              <div className="flex items-center justify-between bg-black/40 p-3 rounded-[24px] mb-4 border border-white/5 gap-2">
                 <div className="text-center flex-1">
-                  <div className="text-[10px] text-indigo-400 font-black uppercase mb-1">PAY GOLD</div>
+                  <div className="text-[8px] text-indigo-400 font-black uppercase mb-1 whitespace-nowrap">PAY GOLD</div>
                   <div className="text-xl font-black text-white">{selectedExchangeAmount.toLocaleString()}</div>
                 </div>
                 <div className="px-4"><ArrowRight className="text-indigo-500" size={24} /></div>
                 <div className="text-center flex-1">
-                  <div className="text-[10px] text-sky-400 font-black uppercase mb-1">GET $MAX</div>
+                  <div className="text-[8px] text-sky-400 font-black uppercase mb-1 whitespace-nowrap">GET $MAX</div>
                   <div className="text-xl font-black text-white">{(selectedExchangeAmount / 1250).toFixed(1)}</div>
                 </div>
               </div>
               <button
                 onClick={convertGoldToMax}
                 disabled={goldBalance < selectedExchangeAmount || isConverting}
-                className={`w-full py-4 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2
+                className={`w-full py-5 rounded-2xl font-black transition-all shadow-2xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 relative z-50
                   ${goldBalance >= selectedExchangeAmount && !isConverting ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-900/50 text-slate-500 cursor-not-allowed border border-white/5'}`}
               >
                 {isConverting ? (
@@ -630,7 +630,7 @@ const App: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
-            <div className="bg-gradient-to-br from-slate-900/90 to-blue-950/90 backdrop-blur-2xl border border-white/10 p-8 rounded-[40px] mb-8 text-center shadow-2xl">
+            <div className="bg-gradient-to-br from-slate-900/90 to-blue-950/90 backdrop-blur-2xl border border-white/10 p-6 rounded-[32px] mb-8 text-center shadow-2xl">
               <p className="text-indigo-200/60 text-[10px] uppercase font-black tracking-widest mb-2">Available Tokens</p>
               <div className="text-6xl font-black mb-8 text-white drop-shadow-2xl">{maxBalance.toFixed(1)} <span className="text-indigo-400 text-xl font-bold italic lowercase">$max</span></div>
               {!isConnected ? (

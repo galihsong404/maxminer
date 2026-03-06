@@ -20,7 +20,7 @@ import {
 
 const config = getDefaultConfig({
   appName: 'Watch to Earn MAX Miner',
-  projectId: import.meta.env.VITE_PROJECT_ID || 'YOUR_PROJECT_ID',
+  projectId: import.meta.env.VITE_PROJECT_ID || 'e9489c77e12cf9091d7f3d7dd2f3e4d1',
   chains: [bsc, bscTestnet],
   ssr: false,
   // Metadata for better Telegram/Mobile deep-linking
