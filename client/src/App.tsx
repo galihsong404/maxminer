@@ -409,9 +409,9 @@ const App: React.FC = () => {
         )}
 
         {activeTab === 'UPGRADE' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col min-h-0">
             <h2 className="text-3xl font-black mb-6 italic uppercase tracking-tighter text-white drop-shadow-[0_4px_10px_rgba(0,0,0,1)]">Gear<span className="text-indigo-400"> Shop</span></h2>
-            <div className="space-y-4 flex-1 overflow-y-auto pr-2 pb-6">
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2 pb-24 overscroll-contain">
               {levels.slice(1).map((lvl) => (
                 <div key={lvl.level} className={`p-5 rounded-[32px] border-2 transition-all 
                   ${minerLevel >= lvl.level ? 'bg-indigo-950 border-indigo-600 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]' : 'bg-white border-white shadow-2xl'}
@@ -443,169 +443,173 @@ const App: React.FC = () => {
         )}
 
         {activeTab === 'FRIENDS' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 overflow-y-auto pb-8">
-            <div className="mb-4">
-              <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg bg-black/40 backdrop-blur-sm px-4 py-1 rounded-2xl inline-block">
-                Referral<span className="text-indigo-400"> Power</span>
-              </h2>
-            </div>
-            <div className="bg-gradient-to-br from-blue-700 to-indigo-900 p-8 rounded-[40px] shadow-2xl mb-6 relative overflow-hidden border border-white/20">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full" />
-              <h3 className="text-xl font-black mb-2 drop-shadow-md uppercase italic tracking-tight">Recruit Miners, Earn $MAX</h3>
-              <p className="text-sm text-blue-100 mb-6 opacity-90 leading-relaxed font-bold drop-shadow-sm">
-                Earn fixed $MAX tokens every time an ad is watched in your network. 5.0 MAX from direct refs, down to 0.5 MAX at Level 5.
-              </p>
-              <button onClick={copyInviteLink} className={`w-full py-4 font-black rounded-2xl transition-all active:scale-[0.98] uppercase tracking-widest text-xs shadow-xl ${copyFeedback ? 'bg-emerald-500 text-white' : 'bg-white text-indigo-950 hover:bg-blue-50'}`}>
-                {copyFeedback ? 'LINK READY! ✅' : 'INVITE PARTNERS'}
-              </button>
-            </div>
-            <div className="bg-slate-900/50 backdrop-blur-md rounded-[32px] border border-white/10 overflow-hidden mb-6 shadow-2xl p-4 min-h-[150px] relative">
-              {loadingReferrals ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {[
-                    { level: 1, title: 'Level 1 (Direct)', yield: '+5.0 MAX/AD', key: 'level1', totalKey: 'totalLevel1' },
-                    { level: 2, title: 'Level 2 (Indirect)', yield: '+2.5 MAX/AD', key: 'level2', totalKey: 'totalLevel2' },
-                    { level: 3, title: 'Level 3 (Network)', yield: '+1.0 MAX/AD', key: 'level3', totalKey: 'totalLevel3' },
-                    { level: 4, title: 'Level 4 (Network)', yield: '+0.5 MAX/AD', key: 'level4', totalKey: 'totalLevel4' },
-                    { level: 5, title: 'Level 5 (Network)', yield: '+0.5 MAX/AD', key: 'level5', totalKey: 'totalLevel5' }
-                  ].map((tier) => {
-                    const isExpanded = expandedLevel === tier.level;
-                    const tierData = referrals?.[tier.key] || [];
-                    const tierTotal = referrals?.stats?.[tier.totalKey] || 0;
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto pb-24 overscroll-contain">
+              <div className="mb-4">
+                <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg bg-black/40 backdrop-blur-sm px-4 py-1 rounded-2xl inline-block">
+                  Referral<span className="text-indigo-400"> Power</span>
+                </h2>
+              </div>
+              <div className="bg-gradient-to-br from-blue-700 to-indigo-900 p-8 rounded-[40px] shadow-2xl mb-6 relative overflow-hidden border border-white/20">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full" />
+                <h3 className="text-xl font-black mb-2 drop-shadow-md uppercase italic tracking-tight">Recruit Miners, Earn $MAX</h3>
+                <p className="text-sm text-blue-100 mb-6 opacity-90 leading-relaxed font-bold drop-shadow-sm">
+                  Earn fixed $MAX tokens every time an ad is watched in your network. 5.0 MAX from direct refs, down to 0.5 MAX at Level 5.
+                </p>
+                <button onClick={copyInviteLink} className={`w-full py-4 font-black rounded-2xl transition-all active:scale-[0.98] uppercase tracking-widest text-xs shadow-xl ${copyFeedback ? 'bg-emerald-500 text-white' : 'bg-white text-indigo-950 hover:bg-blue-50'}`}>
+                  {copyFeedback ? 'LINK READY! ✅' : 'INVITE PARTNERS'}
+                </button>
+              </div>
+              <div className="bg-slate-900/50 backdrop-blur-md rounded-[32px] border border-white/10 overflow-hidden mb-6 shadow-2xl p-4 min-h-[150px] relative">
+                {loadingReferrals ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {[
+                      { level: 1, title: 'Level 1 (Direct)', yield: '+5.0 MAX/AD', key: 'level1', totalKey: 'totalLevel1' },
+                      { level: 2, title: 'Level 2 (Indirect)', yield: '+2.5 MAX/AD', key: 'level2', totalKey: 'totalLevel2' },
+                      { level: 3, title: 'Level 3 (Network)', yield: '+1.0 MAX/AD', key: 'level3', totalKey: 'totalLevel3' },
+                      { level: 4, title: 'Level 4 (Network)', yield: '+0.5 MAX/AD', key: 'level4', totalKey: 'totalLevel4' },
+                      { level: 5, title: 'Level 5 (Network)', yield: '+0.5 MAX/AD', key: 'level5', totalKey: 'totalLevel5' }
+                    ].map((tier) => {
+                      const isExpanded = expandedLevel === tier.level;
+                      const tierData = referrals?.[tier.key] || [];
+                      const tierTotal = referrals?.stats?.[tier.totalKey] || 0;
 
-                    return (
-                      <div key={tier.level} className="bg-slate-950/80 rounded-2xl border border-white/5 overflow-hidden transition-all duration-300 shadow-lg">
-                        <button
-                          onClick={() => setExpandedLevel(isExpanded ? null : tier.level)}
-                          className={`w-full p-4 flex items-center justify-between transition-colors ${isExpanded ? 'bg-indigo-600/10' : 'hover:bg-white/5'}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-white text-xs shadow-inner ${isExpanded ? 'bg-indigo-500' : 'bg-slate-800 border border-white/10'}`}>
-                              L{tier.level}
-                            </div>
-                            <div className="text-left">
-                              <div className="text-white font-black text-sm tracking-tight uppercase">{tier.title}</div>
-                              <div className="text-[10px] text-slate-400 font-bold mt-0.5">{tierTotal} Miners Active</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-emerald-400 font-black text-[10px] bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 shadow-sm leading-none shrink-0">
-                              {tier.yield} YIELD
-                            </div>
-                            {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-500 shrink-0" /> : <ChevronDown className="w-5 h-5 text-slate-500 shrink-0" />}
-                          </div>
-                        </button>
-
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden bg-black/20"
-                            >
-                              <div className="p-4 max-h-[250px] overflow-y-auto space-y-2 border-t border-white/5">
-                                {tierData.length > 0 ? (
-                                  tierData.map((ref: any, idx: number) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-white/5">
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-white uppercase text-xs">
-                                          {ref.username.replace('@', '').charAt(0)}
-                                        </div>
-                                        <div>
-                                          <div className="text-slate-200 font-bold text-sm tracking-tight">{ref.username}</div>
-                                          <div className="text-[9px] text-indigo-400 font-black tracking-widest uppercase mt-0.5">Lv. {ref.minerLevel} Miner</div>
-                                        </div>
-                                      </div>
-                                      <div className="text-[9px] text-slate-500 uppercase font-black">
-                                        {new Date(ref.joinedAt).toLocaleDateString()}
-                                      </div>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="text-center py-6 text-slate-500 text-xs font-bold italic">
-                                    No recruits at this level yet.
-                                  </div>
-                                )}
+                      return (
+                        <div key={tier.level} className="bg-slate-950/80 rounded-2xl border border-white/5 overflow-hidden transition-all duration-300 shadow-lg">
+                          <button
+                            onClick={() => setExpandedLevel(isExpanded ? null : tier.level)}
+                            className={`w-full p-4 flex items-center justify-between transition-colors ${isExpanded ? 'bg-indigo-600/10' : 'hover:bg-white/5'}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-white text-xs shadow-inner ${isExpanded ? 'bg-indigo-500' : 'bg-slate-800 border border-white/10'}`}>
+                                L{tier.level}
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            <div className="p-5 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/5 text-[10px] text-slate-300/80 italic text-center leading-relaxed">
-              * Passive income is calculated per individual ad impression within your hierarchy. Multi-level networking exponentially increases your yield.
+                              <div className="text-left">
+                                <div className="text-white font-black text-sm tracking-tight uppercase">{tier.title}</div>
+                                <div className="text-[10px] text-slate-400 font-bold mt-0.5">{tierTotal} Miners Active</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-emerald-400 font-black text-[10px] bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 shadow-sm leading-none shrink-0">
+                                {tier.yield} YIELD
+                              </div>
+                              {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-500 shrink-0" /> : <ChevronDown className="w-5 h-5 text-slate-500 shrink-0" />}
+                            </div>
+                          </button>
+
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden bg-black/20"
+                              >
+                                <div className="p-4 max-h-[250px] overflow-y-auto space-y-2 border-t border-white/5">
+                                  {tierData.length > 0 ? (
+                                    tierData.map((ref: any, idx: number) => (
+                                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-white/5">
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-white uppercase text-xs">
+                                            {ref.username.replace('@', '').charAt(0)}
+                                          </div>
+                                          <div>
+                                            <div className="text-slate-200 font-bold text-sm tracking-tight">{ref.username}</div>
+                                            <div className="text-[9px] text-indigo-400 font-black tracking-widest uppercase mt-0.5">Lv. {ref.minerLevel} Miner</div>
+                                          </div>
+                                        </div>
+                                        <div className="text-[9px] text-slate-500 uppercase font-black">
+                                          {new Date(ref.joinedAt).toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="text-center py-6 text-slate-500 text-xs font-bold italic">
+                                      No recruits at this level yet.
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              <div className="p-5 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/5 text-[10px] text-slate-300/80 italic text-center leading-relaxed">
+                * Passive income is calculated per individual ad impression within your hierarchy. Multi-level networking exponentially increases your yield.
+              </div>
             </div>
           </motion.div>
         )}
 
         {activeTab === 'WALLET' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col">
-            <h2 className="text-3xl font-black mb-6 italic uppercase tracking-tighter text-white drop-shadow-lg">Bank<span className="text-indigo-400"> vault</span></h2>
-            <div className="bg-blue-950/70 backdrop-blur-xl border border-white/20 p-8 rounded-[40px] mb-6 relative overflow-hidden shadow-2xl">
-              <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-6 drop-shadow-sm text-center">Currency Exchange</h3>
-              <div className="flex items-center justify-between bg-black/40 p-5 rounded-[30px] mb-6 border border-white/5">
-                <div className="text-center flex-1">
-                  <div className="text-[10px] text-indigo-400 font-black uppercase mb-1">PAY GOLD</div>
-                  <div className="text-2xl font-black text-white">5,000</div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto pb-24 overscroll-contain">
+              <h2 className="text-3xl font-black mb-6 italic uppercase tracking-tighter text-white drop-shadow-lg">Bank<span className="text-indigo-400"> vault</span></h2>
+              <div className="bg-blue-950/70 backdrop-blur-xl border border-white/20 p-8 rounded-[40px] mb-6 relative overflow-hidden shadow-2xl">
+                <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-6 drop-shadow-sm text-center">Currency Exchange</h3>
+                <div className="flex items-center justify-between bg-black/40 p-5 rounded-[30px] mb-6 border border-white/5">
+                  <div className="text-center flex-1">
+                    <div className="text-[10px] text-indigo-400 font-black uppercase mb-1">PAY GOLD</div>
+                    <div className="text-2xl font-black text-white">5,000</div>
+                  </div>
+                  <div className="px-4"><ArrowRight className="text-indigo-500" size={24} /></div>
+                  <div className="text-center flex-1">
+                    <div className="text-[10px] text-sky-400 font-black uppercase mb-1">GET $MAX</div>
+                    <div className="text-2xl font-black text-white">4.0</div>
+                  </div>
                 </div>
-                <div className="px-4"><ArrowRight className="text-indigo-500" size={24} /></div>
-                <div className="text-center flex-1">
-                  <div className="text-[10px] text-sky-400 font-black uppercase mb-1">GET $MAX</div>
-                  <div className="text-2xl font-black text-white">4.0</div>
-                </div>
-              </div>
-              <button
-                onClick={convertGoldToMax}
-                disabled={goldBalance < 5000 || isConverting}
-                className={`w-full py-4 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2
+                <button
+                  onClick={convertGoldToMax}
+                  disabled={goldBalance < 5000 || isConverting}
+                  className={`w-full py-4 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2
                   ${goldBalance >= 5000 && !isConverting ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-900/50 text-slate-500 cursor-not-allowed border border-white/5'}`}
-              >
-                {isConverting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    PROCESSING...
-                  </>
-                ) : (
-                  'SWAP CURRENCY'
-                )}
-              </button>
-
-              <AnimatePresence>
-                {conversionResult && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className={`mt-4 p-3 rounded-xl text-center text-[10px] font-black uppercase tracking-widest border
-                      ${conversionResult.success ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}
-                  >
-                    {conversionResult.message}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <div className="bg-gradient-to-br from-slate-900/90 to-blue-950/90 backdrop-blur-2xl border border-white/10 p-8 rounded-[40px] mb-8 text-center shadow-2xl">
-              <p className="text-indigo-200/60 text-[10px] uppercase font-black tracking-widest mb-2">Available Tokens</p>
-              <div className="text-6xl font-black mb-8 text-white drop-shadow-2xl">{maxBalance.toFixed(1)} <span className="text-indigo-400 text-xl font-bold italic lowercase">$max</span></div>
-              {!isConnected ? (
-                <ConnectButton.Custom>
-                  {({ openConnectModal }) => (
-                    <button onClick={openConnectModal} className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-950/40 uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 transition-all">LINK EXTERNAL WALLET</button>
+                >
+                  {isConverting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      PROCESSING...
+                    </>
+                  ) : (
+                    'SWAP CURRENCY'
                   )}
-                </ConnectButton.Custom>
-              ) : (
-                <button disabled={maxBalance < 1000} onClick={() => { const address = prompt("Enter BSC Wallet Address:"); if (address && maxBalance >= 1000) handleWithdrawal(1000, address); }} className={`w-full py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs ${maxBalance >= 1000 ? 'bg-white text-indigo-950 hover:bg-blue-50' : 'bg-slate-900/50 text-slate-500 border border-white/5'}`}>INITIATE WITHDRAWAL (1.0K+)</button>
-              )}
+                </button>
+
+                <AnimatePresence>
+                  {conversionResult && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={`mt-4 p-3 rounded-xl text-center text-[10px] font-black uppercase tracking-widest border
+                      ${conversionResult.success ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}
+                    >
+                      {conversionResult.message}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="bg-gradient-to-br from-slate-900/90 to-blue-950/90 backdrop-blur-2xl border border-white/10 p-8 rounded-[40px] mb-8 text-center shadow-2xl">
+                <p className="text-indigo-200/60 text-[10px] uppercase font-black tracking-widest mb-2">Available Tokens</p>
+                <div className="text-6xl font-black mb-8 text-white drop-shadow-2xl">{maxBalance.toFixed(1)} <span className="text-indigo-400 text-xl font-bold italic lowercase">$max</span></div>
+                {!isConnected ? (
+                  <ConnectButton.Custom>
+                    {({ openConnectModal }) => (
+                      <button onClick={openConnectModal} className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-950/40 uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 transition-all">LINK EXTERNAL WALLET</button>
+                    )}
+                  </ConnectButton.Custom>
+                ) : (
+                  <button disabled={maxBalance < 1000} onClick={() => { const address = prompt("Enter BSC Wallet Address:"); if (address && maxBalance >= 1000) handleWithdrawal(1000, address); }} className={`w-full py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs ${maxBalance >= 1000 ? 'bg-white text-indigo-950 hover:bg-blue-50' : 'bg-slate-900/50 text-slate-500 border border-white/5'}`}>INITIATE WITHDRAWAL (1.0K+)</button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
