@@ -60,6 +60,7 @@ const App: React.FC = () => {
 
   const maxFuelSeconds = 15 * 60;
   const MAX_ADS_PER_DAY = 50;
+  const [selectedExchangeAmount, setSelectedExchangeAmount] = useState<50000 | 500000>(50000);
 
   const goldBalance = visualGold;
   const maxBalance = profile ? Number(profile.maxBalance) : 0;
@@ -568,7 +569,7 @@ const App: React.FC = () => {
         )}
 
         {activeTab === 'WALLET' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 overflow-y-auto pb-32 no-scrollbar min-h-0 flex flex-col">
             <h2 className="text-3xl font-black mb-6 italic uppercase tracking-tighter text-white drop-shadow-lg">Bank<span className="text-indigo-400"> vault</span></h2>
             <div className="bg-blue-950/70 backdrop-blur-xl border border-white/20 p-8 rounded-[40px] mb-6 relative overflow-hidden shadow-2xl">
               <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-6 drop-shadow-sm text-center">Currency Exchange</h3>
