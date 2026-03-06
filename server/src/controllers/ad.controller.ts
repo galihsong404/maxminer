@@ -191,3 +191,142 @@ export const adNetworkCallback = async (req: Request, res: Response): Promise<vo
         res.status(500).send('Internal Server Error');
     }
 };
+
+/**
+ * [PHASE 11 FIX] Client-side Ad Claim Endpoint
+ * Called by the frontend AFTER the Monetag SDK's show() promise resolves.
+ * This bypasses the unreliable S2S postback which never arrives in TMA context.
+ * Security: JWT-authenticated + PENDING session with matching userId + Redis TTL.
+ */
+export const claimAdSDK = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const { sessionId } = req.body;
+
+        if (!userId || !sessionId) {
+            res.status(400).json({ error: 'Missing userId or sessionId' });
+            return;
+        }
+
+        // Validate the session exists, is PENDING, and belongs to this user
+        const session = await prisma.adSession.findUnique({ where: { sessionId } });
+
+        if (!session || session.userId !== userId) {
+            res.status(400).json({ error: 'Invalid session' });
+            return;
+        }
+
+        if (session.status !== 'PENDING') {
+            // Already claimed — just return current profile (idempotent)
+            res.status(200).json({ success: true, alreadyClaimed: true });
+            return;
+        }
+
+        // Check Redis TTL — session must still be within the 120s window
+        const redisKey = `ad_session:${sessionId}`;
+        const cachedUserId = await redis.get(redisKey);
+        if (!cachedUserId || cachedUserId !== userId) {
+            res.status(400).json({ error: 'Session expired or invalid' });
+            return;
+        }
+
+        // Process the claim (same logic as adNetworkCallback)
+        await prisma.$transaction(async (tx: any) => {
+            // 1. Mark session as validated
+            await tx.adSession.update({
+                where: { sessionId },
+                data: {
+                    status: 'VALIDATED',
+                    rewardType: 'VALUED',
+                    completedAt: new Date()
+                }
+            });
+
+            // 2. Determine Tier (rolling 24h count)
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const adCountToday = await tx.adSession.count({
+                where: { userId, status: 'VALIDATED', createdAt: { gte: twentyFourHoursAgo } }
+            });
+
+            // 3. Mystery Box Logic
+            let goldReward = 0;
+            let maxReward = 0;
+            const rand = Math.random() * 100;
+
+            if (adCountToday <= 10) {
+                goldReward = 500;
+            } else if (adCountToday <= 25) {
+                if (rand < 90) goldReward = 1000; else maxReward = 1;
+            } else if (adCountToday <= 40) {
+                if (rand < 80) goldReward = 2500; else maxReward = 5;
+            } else {
+                if (rand < 90) goldReward = 5000; else if (rand < 99.9) maxReward = 10; else maxReward = 1000;
+            }
+
+            // 4. Create Transaction record
+            await tx.transaction.create({
+                data: {
+                    userId,
+                    type: 'BOX_OPEN',
+                    amount: maxReward > 0 ? maxReward : goldReward,
+                    currency: maxReward > 0 ? 'MAX' : 'GOLD',
+                    description: `Mystery Box (Ad #${adCountToday})`
+                }
+            });
+
+            // 5. Update User Balance & Refill Fuel
+            const user = await tx.user.update({
+                where: { id: userId },
+                data: {
+                    goldBalance: { increment: goldReward },
+                    maxBalance: { increment: maxReward },
+                    fuelUpdatedAt: new Date(),
+                    lastAdWatch: new Date()
+                }
+            });
+
+            // 6. Set Redis Cooldown (840s = 14 mins) enforcement lock
+            await redis.set(`ad_cooldown:${userId}`, Date.now().toString(), 'EX', 840);
+
+            // 7. Pay referrals
+            if (user.referrerId) {
+                let currentReferrerId: string | null = user.referrerId;
+                const payoutLevels = [5.0, 2.5, 1.0, 0.5, 0.5];
+
+                for (let i = 0; i < 5 && currentReferrerId; i++) {
+                    const payoutMax = payoutLevels[i];
+
+                    await tx.user.update({
+                        where: { id: currentReferrerId },
+                        data: { maxBalance: { increment: payoutMax } }
+                    });
+
+                    await tx.transaction.create({
+                        data: {
+                            userId: currentReferrerId,
+                            type: 'REFERRAL_PAYOUT',
+                            amount: payoutMax,
+                            currency: 'MAX',
+                            description: `L${i + 1} Referral from ${userId}`
+                        }
+                    });
+
+                    const parentData: any = await tx.user.findUnique({
+                        where: { id: currentReferrerId },
+                        select: { referrerId: true }
+                    });
+                    currentReferrerId = parentData?.referrerId ?? null;
+                }
+            }
+        });
+
+        // Clean up Redis session key
+        await redis.del(redisKey);
+
+        res.status(200).json({ success: true, message: 'Ad reward claimed successfully' });
+
+    } catch (error) {
+        console.error('Claim Ad SDK Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

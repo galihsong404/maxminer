@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { requestAd, adNetworkCallback } from '../controllers/ad.controller';
+import { requestAd, adNetworkCallback, claimAdSDK } from '../controllers/ad.controller';
 import { authenticateJWT } from '../middlewares/auth.middleware';
 import { validateAdRequest } from '../middlewares/ad.middleware';
 
@@ -10,6 +10,9 @@ router.post('/request', authenticateJWT, validateAdRequest, requestAd);
 
 // S2S Webhook called by the Ad Network (Monetag/AdsGram) AFTER the user finishes the ad.
 router.get('/callback', adNetworkCallback);
+
+// [PHASE 11] Client-side claim after SDK video completes (bypasses unreliable S2S)
+router.post('/claim-sdk', authenticateJWT, claimAdSDK);
 
 // [DEV ONLY] Helper to simulate ad network callbacks from the frontend
 if (process.env.NODE_ENV !== 'production') {

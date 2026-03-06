@@ -73,6 +73,13 @@ class Api {
         });
     }
 
+    async claimAdSDK(sessionId: string) {
+        return this.request('/ad/claim-sdk', {
+            method: 'POST',
+            body: JSON.stringify({ sessionId })
+        });
+    }
+
     async convertGoldToMax(goldAmount: number) {
         return this.request('/economy/convert', {
             method: 'POST',

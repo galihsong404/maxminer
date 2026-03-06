@@ -153,50 +153,49 @@ export function useGameEngine() {
         try {
             const res = await api.requestAd();
             if (res.success && res.sessionId) {
+                const currentSessionId = res.sessionId;
 
                 // Snapshot pre-ad balances
                 const preGold = Number(profile.goldBalance);
                 const preMax = Number(profile.maxBalance);
 
                 // 🚀 MONETAG IN-APP VIDEO INTEGRATION
-                // Trigger the SDK function injected in index.html, not a new tab.
                 const telegramId = profile.id || 'unknown';
 
+                let adWatched = false;
+
                 if (typeof (window as any).show_10685393 === 'function') {
-                    // Start the video ad. Monetag SDK supports the same S2S tracking format via an object payload
-                    (window as any).show_10685393({
-                        custom: res.sessionId,   // Matches our Postback `{request_var}`
-                        uid: telegramId          // Matches our Postback `{telegram_id}`
-                    }).then(() => {
-                        console.log("Monetag SDK: Ad video started or finished");
-                    }).catch((error: Error) => {
+                    try {
+                        await (window as any).show_10685393({
+                            custom: currentSessionId,
+                            uid: telegramId
+                        });
+                        adWatched = true;
+                        console.log("Monetag SDK: Ad completed");
+                    } catch (error: any) {
                         console.error("Monetag SDK Error:", error);
-                        // Fallback: If ad blocker intercepts, user doesn't get fuel.
-                    });
+                        // Ad was likely closed early or blocked
+                    }
                 } else {
-                    console.error("Monetag SDK show_10685393 is not loaded.");
+                    console.warn("Monetag SDK not loaded, claiming session directly for testing");
+                    adWatched = true; // Allow claim in dev/testing
                 }
 
-                // Poll server every 3 seconds to check if Monetag Webhook arrived (Max 1 minute)
-                // We keep polling because we rely on the S2S secure postback for rewards.
-                let pollAttempts = 0;
-                const maxAttempts = 20; // 3 sec * 20 = 60 seconds max
+                if (adWatched) {
+                    // [PHASE 11] Call server directly to claim the reward
+                    try {
+                        await api.claimAdSDK(currentSessionId);
 
-                const pollInterval = setInterval(async () => {
-                    pollAttempts++;
-                    const updated = await api.getProfile();
-
-                    if (updated.success) {
-                        const postFuel = Number(updated.data.fuel.remainingSeconds);
-                        const postGold = Number(updated.data.goldBalance);
-                        const postMax = Number(updated.data.maxBalance);
-
-                        // If fuel updated, the Ad Webhook was successful
-                        if (postFuel > 0) {
-                            clearInterval(pollInterval);
+                        // Refresh profile to get updated fuel & balances
+                        const updated = await api.getProfile();
+                        if (updated.success) {
                             setProfile(updated.data);
 
-                            // Calculate Box Reward dynamically from backend increments
+                            const postGold = Number(updated.data.goldBalance);
+                            const postMax = Number(updated.data.maxBalance);
+                            const postFuel = Number(updated.data.fuel.remainingSeconds);
+
+                            // Calculate Box Reward dynamically
                             const diffGold = postGold - preGold;
                             const diffMax = postMax - preMax;
 
@@ -212,19 +211,15 @@ export function useGameEngine() {
                             setFuelSeconds(postFuel);
                             setUnclaimedGold(0);
                             lastSyncTimeRef.current = Date.now();
-                        } else if (pollAttempts >= maxAttempts) {
-                            // Stop polling if user abandoned the ad or it failed
-                            clearInterval(pollInterval);
-                            console.log("Ad validation timed out.");
-                            setIsAdLoading(false);
                         }
-                    } else if (pollAttempts >= maxAttempts) {
-                        clearInterval(pollInterval);
-                        setIsAdLoading(false);
+                    } catch (claimError: any) {
+                        console.error("Claim SDK Error:", claimError);
+                        alert("Failed to claim ad reward. Please try again.");
                     }
-                }, 3000); // Poll every 3 seconds
+                }
 
-                return true;
+                setIsAdLoading(false);
+                return adWatched;
             } else {
                 setIsAdLoading(false);
                 return false;
