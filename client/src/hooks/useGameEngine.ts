@@ -75,6 +75,7 @@ export function useGameEngine() {
         try {
             const res = await api.getProfile();
             if (res.success) {
+                console.log("[DEBUG] Profile Data received:", res.data);
                 setProfile(res.data);
                 setVisualGold(Number(res.data.goldBalance));
                 setFuelSeconds(res.data.fuel.remainingSeconds);

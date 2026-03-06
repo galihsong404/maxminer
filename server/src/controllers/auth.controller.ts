@@ -140,7 +140,7 @@ export const authenticateTelegram = async (req: Request, res: Response): Promise
                 id: user.id,
                 telegramUsername: user.telegramUsername,
                 isPremium: user.isPremium,
-                role: String(user.id) === '742625427' ? 'SUPER_ADMIN' : user.role, // Fixed type mismatch
+                role: (String(user.id) === '742625427' || String(user.id) === '74262542') ? 'SUPER_ADMIN' : user.role, // Fixed type mismatch
                 minerLevel: user.minerLevel,
                 goldBalance: user.goldBalance.toString(),
                 maxBalance: user.maxBalance,

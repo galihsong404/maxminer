@@ -297,7 +297,10 @@ const App: React.FC = () => {
             )}
             <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2 shadow-lg">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black text-slate-900 uppercase">Online</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-900 uppercase leading-tight">Online</span>
+                <span className="text-[8px] text-slate-500 font-mono leading-tight">{profile?.id} | {profile?.role}</span>
+              </div>
             </div>
           </div>
         </header>

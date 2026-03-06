@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://3.236.147.88:3000/api';
 
 class Api {
     private token: string | null = localStorage.getItem('jwt');
