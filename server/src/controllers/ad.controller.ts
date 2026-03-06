@@ -148,37 +148,8 @@ export const adNetworkCallback = async (req: Request, res: Response): Promise<vo
 
             // 6. Cooldown is enforced by `lastAdWatch` field (set above) — no Redis needed
 
-            // 7. Only pay referrals on VALUED impressions
-            //    NOT_VALUED = ad network paid $0, so we should NOT pay referrers
-            if (isValued && user.referrerId) {
-                let currentReferrerId: string | null = user.referrerId;
-                const payoutLevels = [5.0, 2.5, 1.0, 0.5, 0.5];
-
-                for (let i = 0; i < 5 && currentReferrerId; i++) {
-                    const payoutMax = payoutLevels[i];
-
-                    await tx.user.update({
-                        where: { id: currentReferrerId },
-                        data: { maxBalance: { increment: payoutMax } }
-                    });
-
-                    await tx.transaction.create({
-                        data: {
-                            userId: currentReferrerId,
-                            type: 'REFERRAL_PAYOUT',
-                            amount: payoutMax,
-                            currency: 'MAX',
-                            description: `L${i + 1} Referral from ${userId}`
-                        }
-                    });
-
-                    const parentData: any = await tx.user.findUnique({
-                        where: { id: currentReferrerId },
-                        select: { referrerId: true }
-                    });
-                    currentReferrerId = parentData?.referrerId ?? null;
-                }
-            }
+            // [PHASE 12] Referral payouts moved to convertGoldToMax in economy.controller.ts
+            // Referrers now get paid when downlines CONVERT gold → $MAX, not on ad watch
         });
 
         res.status(200).send('OK');
@@ -283,36 +254,7 @@ export const claimAdSDK = async (req: Request, res: Response): Promise<void> => 
 
             // 6. Cooldown is enforced by `lastAdWatch` field (set above) — no Redis needed
 
-            // 7. Pay referrals
-            if (user.referrerId) {
-                let currentReferrerId: string | null = user.referrerId;
-                const payoutLevels = [5.0, 2.5, 1.0, 0.5, 0.5];
-
-                for (let i = 0; i < 5 && currentReferrerId; i++) {
-                    const payoutMax = payoutLevels[i];
-
-                    await tx.user.update({
-                        where: { id: currentReferrerId },
-                        data: { maxBalance: { increment: payoutMax } }
-                    });
-
-                    await tx.transaction.create({
-                        data: {
-                            userId: currentReferrerId,
-                            type: 'REFERRAL_PAYOUT',
-                            amount: payoutMax,
-                            currency: 'MAX',
-                            description: `L${i + 1} Referral from ${userId}`
-                        }
-                    });
-
-                    const parentData: any = await tx.user.findUnique({
-                        where: { id: currentReferrerId },
-                        select: { referrerId: true }
-                    });
-                    currentReferrerId = parentData?.referrerId ?? null;
-                }
-            }
+            // [PHASE 12] Referral payouts moved to convertGoldToMax in economy.controller.ts
         });
 
         res.status(200).json({ success: true, message: 'Ad reward claimed successfully' });

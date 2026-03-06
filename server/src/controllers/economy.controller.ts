@@ -34,7 +34,7 @@ export const convertGoldToMax = async (req: Request, res: Response): Promise<voi
         const result = await prisma.$transaction(async (tx: any) => {
             const user = await tx.user.findUnique({
                 where: { id: userId },
-                select: { goldBalance: true }
+                select: { goldBalance: true, referrerId: true }
             });
 
             if (!user) {
@@ -64,6 +64,38 @@ export const convertGoldToMax = async (req: Request, res: Response): Promise<voi
                     description: `Converted ${goldAmount} Gold (-20% Tax)`
                 }
             });
+
+            // [PHASE 12] Referral Payout — triggered on CONVERSION, not on ad watch
+            // Upline chain (up to 5 levels) receives a % of converted $MAX as bonus
+            if (user.referrerId) {
+                let currentReferrerId: string | null = user.referrerId;
+                const payoutLevels = [5.0, 2.5, 1.0, 0.5, 0.5]; // L1→L5
+
+                for (let i = 0; i < 5 && currentReferrerId; i++) {
+                    const payoutMax = payoutLevels[i];
+
+                    await tx.user.update({
+                        where: { id: currentReferrerId },
+                        data: { maxBalance: { increment: payoutMax } }
+                    });
+
+                    await tx.transaction.create({
+                        data: {
+                            userId: currentReferrerId,
+                            type: 'REFERRAL_PAYOUT',
+                            amount: payoutMax,
+                            currency: 'MAX',
+                            description: `L${i + 1} Referral bonus from ${userId} conversion`
+                        }
+                    });
+
+                    const parentData: any = await tx.user.findUnique({
+                        where: { id: currentReferrerId },
+                        select: { referrerId: true }
+                    });
+                    currentReferrerId = parentData?.referrerId ?? null;
+                }
+            }
 
             return { netMaxReceived: netMaxTokens };
         });

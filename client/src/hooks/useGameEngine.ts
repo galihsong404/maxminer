@@ -36,6 +36,22 @@ export function useGameEngine() {
                 setInitError(loginRes.error || "Login failed");
                 return;
             }
+
+            // [PHASE 12 FIX] Resume pending ad claim after page reload
+            // When Monetag SDK opens an ad in a new tab, the React app reloads on return.
+            // The sessionId is saved in localStorage BEFORE the ad opens.
+            const pendingSession = localStorage.getItem('pending_ad_session');
+            if (pendingSession) {
+                console.log("Resuming pending ad session:", pendingSession);
+                localStorage.removeItem('pending_ad_session');
+                try {
+                    await api.claimAdSDK(pendingSession);
+                    console.log("Pending ad session claimed successfully");
+                } catch (e: any) {
+                    console.warn("Pending ad claim failed (may already be claimed):", e.message);
+                }
+            }
+
             await refreshProfile();
 
             // 4. Signal readiness to Telegram
@@ -155,6 +171,10 @@ export function useGameEngine() {
             if (res.success && res.sessionId) {
                 const currentSessionId = res.sessionId;
 
+                // [PHASE 12 FIX] Save sessionId to localStorage BEFORE opening ad
+                // This survives page reloads when Monetag opens a new browser tab
+                localStorage.setItem('pending_ad_session', currentSessionId);
+
                 // Snapshot pre-ad balances
                 const preGold = Number(profile.goldBalance);
                 const preMax = Number(profile.maxBalance);
@@ -174,17 +194,18 @@ export function useGameEngine() {
                         console.log("Monetag SDK: Ad completed");
                     } catch (error: any) {
                         console.error("Monetag SDK Error:", error);
-                        // Ad was likely closed early or blocked
                     }
                 } else {
                     console.warn("Monetag SDK not loaded, claiming session directly for testing");
-                    adWatched = true; // Allow claim in dev/testing
+                    adWatched = true;
                 }
 
                 if (adWatched) {
-                    // [PHASE 11] Call server directly to claim the reward
+                    // Call server directly to claim the reward
                     try {
                         await api.claimAdSDK(currentSessionId);
+                        // Clear pending — successfully claimed in same session
+                        localStorage.removeItem('pending_ad_session');
 
                         // Refresh profile to get updated fuel & balances
                         const updated = await api.getProfile();
@@ -195,7 +216,6 @@ export function useGameEngine() {
                             const postMax = Number(updated.data.maxBalance);
                             const postFuel = Number(updated.data.fuel.remainingSeconds);
 
-                            // Calculate Box Reward dynamically
                             const diffGold = postGold - preGold;
                             const diffMax = postMax - preMax;
 
@@ -214,7 +234,7 @@ export function useGameEngine() {
                         }
                     } catch (claimError: any) {
                         console.error("Claim SDK Error:", claimError);
-                        alert("Failed to claim ad reward. Please try again.");
+                        // Don't clear localStorage — init() will retry on next reload
                     }
                 }
 
