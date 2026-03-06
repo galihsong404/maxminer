@@ -41,6 +41,11 @@ app.get('/api/health', (req, res) => {
 
 // [IMPORTANT] Keeping the improved Payout Service in Production
 import { startPayoutService } from './services/payout.service';
+import { botService } from './services/bot.service';
+
+// Start Telegram Bot
+botService.init();
+
 // Start Background Worker for Withdrawals
 if (process.env.NODE_ENV === 'production' || process.env.ENABLE_PAYOUTS === 'true') {
     startPayoutService();
