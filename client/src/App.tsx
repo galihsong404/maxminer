@@ -311,7 +311,7 @@ const App: React.FC = () => {
         </header>
 
         {activeTab === 'MINE' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar pb-24">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar pb-12">
 
             {/* Top Info Cards - Compact */}
             <div className="grid grid-cols-2 gap-2 mb-1">
