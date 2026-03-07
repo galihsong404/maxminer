@@ -285,8 +285,8 @@ const App: React.FC = () => {
         />
       </div>
 
-      <div className="relative z-10 max-w-md mx-auto h-screen flex flex-col pt-1 px-3 overflow-hidden">
-        <header className="flex justify-between items-center mb-1">
+      <div className="relative z-10 max-w-md mx-auto h-screen flex flex-col pt-0 px-3 overflow-hidden">
+        <header className="flex justify-between items-center mb-0">
           <div className="flex items-center ml-2">
             <img src="/logo.png" alt="Max Miner Logo" className="h-[68px] object-contain drop-shadow-xl" />
           </div>
@@ -350,7 +350,7 @@ const App: React.FC = () => {
             {/* Central Area - Level Info + Logo */}
             <div className="flex-1 flex flex-col items-center justify-center">
               {/* Level Info Box - Royal Blue Solid */}
-              <div className="bg-blue-600 px-4 py-1.5 rounded-2xl inline-flex flex-col items-center shadow-lg mb-6 -mt-8 border border-white/20">
+              <div className="bg-blue-600 px-4 py-1.5 rounded-2xl inline-flex flex-col items-center shadow-lg mb-6 mt-0 border border-white/20">
                 <div className="inline-block bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 py-0.5 rounded-full text-[8px] font-black text-slate-950 uppercase tracking-widest">
                   Level {currentLevelInfo.level}
                 </div>
