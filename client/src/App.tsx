@@ -311,7 +311,7 @@ const App: React.FC = () => {
         </header>
 
         {activeTab === 'MINE' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar pb-12">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar pb-32">
 
             {/* Top Info Cards - Compact */}
             <div className="grid grid-cols-2 gap-2 mb-1">
@@ -377,7 +377,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Bottom Controls - Flush with Nav */}
-            <div className="mt-auto mb-0 space-y-1 relative z-30">
+            <div className="mt-auto mb-4 space-y-1 relative z-30">
               <div className="bg-white p-2 rounded-xl shadow-lg border-2 border-indigo-100">
                 <div className="flex justify-between items-end mb-1">
                   <div>
