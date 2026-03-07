@@ -285,8 +285,8 @@ const App: React.FC = () => {
         />
       </div>
 
-      <div className="relative z-10 max-w-md mx-auto h-screen flex flex-col pt-3 px-3 overflow-hidden">
-        <header className="flex justify-between items-center mb-4">
+      <div className="relative z-10 max-w-md mx-auto h-screen flex flex-col pt-1 px-3 overflow-hidden">
+        <header className="flex justify-between items-center mb-1">
           <div className="flex items-center ml-2">
             <img src="/logo.png" alt="Max Miner Logo" className="h-[68px] object-contain drop-shadow-xl" />
           </div>
@@ -314,36 +314,36 @@ const App: React.FC = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar pb-32">
 
             {/* Top Info Cards - Compact */}
-            <div className="grid grid-cols-2 gap-2 mb-1">
-              <div className="bg-white p-2 rounded-2xl flex flex-col items-center shadow-lg relative overflow-hidden group">
+            <div className="grid grid-cols-2 gap-1.5 mb-1 text-center font-black italic uppercase tracking-tighter">
+              <div className="bg-white p-1.5 rounded-xl flex flex-col items-center shadow-md relative overflow-hidden group">
                 <div className="absolute inset-0 bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="text-[8px] text-amber-600 font-black uppercase tracking-widest mb-0.5 z-10">Gold Vault</span>
-                <span className="text-lg font-black text-slate-900 leading-none z-10">{Math.floor(goldBalance).toLocaleString()}</span>
+                <span className="text-[7px] text-amber-600 font-black uppercase tracking-widest mb-0 z-10">Gold Vault</span>
+                <span className="text-base font-black text-slate-900 leading-none z-10">{Math.floor(goldBalance).toLocaleString()}</span>
               </div>
-              <div className="bg-white p-2 rounded-2xl flex flex-col items-center shadow-lg relative overflow-hidden group">
+              <div className="bg-white p-1.5 rounded-xl flex flex-col items-center shadow-md relative overflow-hidden group">
                 <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="text-[8px] text-indigo-600 font-black uppercase tracking-widest mb-0.5 z-10">Max Tokens</span>
-                <span className="text-lg font-black text-slate-900 leading-none z-10">{maxBalance.toFixed(1)}</span>
+                <span className="text-[7px] text-indigo-600 font-black uppercase tracking-widest mb-0 z-10">Max Tokens</span>
+                <span className="text-base font-black text-slate-900 leading-none z-10">{maxBalance.toFixed(1)}</span>
               </div>
             </div>
 
-            {/* Unclaimed Gold & Claim Button */}
-            <div className="mt-2 mb-2 w-full bg-slate-900/60 backdrop-blur-md rounded-[20px] p-3 flex items-center justify-between border border-white/10 shadow-xl">
+            {/* Unclaimed Gold & Claim Button - Compact */}
+            <div className="mt-1 mb-1 w-full bg-slate-900/60 backdrop-blur-md rounded-[16px] p-2 flex items-center justify-between border border-white/10 shadow-lg">
               <div className="flex flex-col">
-                <span className="text-[9px] text-amber-400 font-black uppercase tracking-widest">Mining Yield</span>
-                <span className="text-xl font-black text-white italic tracking-tighter">
+                <span className="text-[8px] text-amber-400 font-black uppercase tracking-widest">Mining Yield</span>
+                <span className="text-lg font-black text-white italic tracking-tighter leading-none mt-0.5">
                   +{Math.floor(unclaimedGold).toLocaleString()}
                 </span>
               </div>
               <button
                 onClick={claimGold}
                 disabled={isClaiming || unclaimedGold <= 0}
-                className={`px-5 py-2.5 rounded-[14px] font-black uppercase text-[10px] tracking-widest shadow-lg transition-all active:scale-95 ${unclaimedGold > 0 && !isClaiming
+                className={`px-4 py-1.5 rounded-[10px] font-black uppercase text-[9px] tracking-widest shadow-md transition-all active:scale-95 ${unclaimedGold > 0 && !isClaiming
                   ? 'bg-amber-500 text-slate-900 hover:bg-amber-400 shadow-amber-500/20'
                   : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
                   }`}
               >
-                {isClaiming ? 'Claiming...' : 'Claim Gold'}
+                {isClaiming ? '...' : 'CLAIM'}
               </button>
             </div>
 
