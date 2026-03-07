@@ -676,7 +676,7 @@ const App: React.FC = () => {
           </motion.div>
         )}
 
-        <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-indigo-500/20 h-24 px-6 flex justify-between items-center z-50 max-w-[400px] mx-auto rounded-t-[36px] shadow-[0_-15px_50px_rgba(0,0,0,0.6)] border-x border-indigo-500/10">
+        <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-indigo-500/20 h-20 px-6 flex justify-between items-center z-50 max-w-md mx-auto rounded-t-[32px] shadow-[0_-15px_50px_rgba(0,0,0,0.6)] border-x border-indigo-500/10">
           {[
             { id: 'MINE', icon: Star, label: 'Mine', color: 'text-amber-400', bg: 'bg-amber-400/10' },
             { id: 'UPGRADE', icon: Rocket, label: 'Boost', color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
